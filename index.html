@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>ちキメモ - 吉岡町の危険マップ</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background: #f5f5f5;
+    }
+    header {
+      background: #c00;
+      color: white;
+      padding: 15px;
+      text-align: center;
+      font-size: 1.5em;
+    }
+    main {
+      height: calc(100vh - 150px);
+      overflow: hidden;
+      padding: 0;
+      position: relative;
+    }
+    #map {
+      height: 100%;
+      width: 100%;
+    }
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: white;
+      border-top: 1px solid #ccc;
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0;
+    }
+    .bottom-nav button {
+      background: none;
+      border: none;
+      font-size: 1.5em;
+      cursor: pointer;
+    }
+    #postForm, #loginForm {
+      position: fixed;
+      bottom: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: white;
+      border: 1px solid #ccc;
+      padding: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      z-index: 1000;
+      display: none;
+      width: 90%;
+      max-width: 400px;
+      border-radius: 8px;
+    }
+    #postForm input, #postForm textarea,
+    #loginForm input {
+      width: 100%;
+      margin-bottom: 8px;
+      padding: 6px;
+      box-sizing: border-box;
+      font-size: 1em;
+    }
+    #postForm button, #loginForm button {
+      padding: 8px 12px;
+      font-size: 1em;
+      cursor: pointer;
+    }
+    #previewImage {
+      max-width: 100%;
+      max-height: 150px;
+      margin-bottom: 8px;
+      display: none;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    #loginStatus {
+      position: fixed;
+      top: 5px;
+      right: 10px;
+      background: #c00;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 12px;
+      font-size: 0.9em;
+      z-index: 1100;
+    }
+  </style>
+</head>
+<body>
+
+  <header>ちキメモ</header>
+
+  <main id="main-view">
+    <div id="map"></div>
+  </main>
+
+  <nav class="bottom-nav">
+    <button onclick="showMap()">🗺</button>
+    <button id="postBtn" onclick="enablePostMode()">➕ 投稿</button>
+    <button onclick="alert('現在地機能はまだです')">📍</button>
+    <button id="loginBtn" onclick="showLoginForm()">🔐 ログイン</button>
+    <button onclick="alert('一覧機能はまだです')">🧾</button>
+  </nav>
+
+  <!-- 投稿フォーム -->
+  <div id="postForm">
+    <h3>危険場所を投稿</h3>
+    <input type="text" id="postTitle" placeholder="タイトル（必須）" required />
+    <textarea id="postComment" rows="3" placeholder="コメント（任意）"></textarea>
+    <input type="file" id="postImage" accept="image/*" capture="environment" />
+    <img id="previewImage" alt="写真プレビュー" />
+    <div>
+      <button onclick="submitPost()">投稿する</button>
+      <button onclick="cancelPost()" style="margin-left:10px;">キャンセル</button>
+    </div>
+  </div>
+
+  <!-- ログインフォーム -->
+  <div id="loginForm">
+    <h3>ログイン</h3>
+    <input type="text" id="username" placeholder="ユーザー名" />
+    <div>
+      <button onclick="login()">ログイン</button>
+      <button onclick="hideLoginForm()" style="margin-left:10px;">キャンセル</button>
+    </div>
+  </div>
+
+  <div id="loginStatus" style="display:none;"></div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+
+  <script>
+    let map;
+    let geojsonData = null;
+    let geoJsonLayer = null;
+    let isPostMode = false;
+    let tempMarker = null;
+    let postLatLng = null;
+    let postImageDataUrl = null;
+    let loggedInUser = null;
+
+    // 初期化時にログイン状態チェック
+    window.onload = function() {
+      loadLoginStatus();
+      showMap();
+    };
+
+    function loadLoginStatus() {
+      loggedInUser = localStorage.getItem('loggedInUser');
+      updateLoginUI();
+    }
+
+    function saveLoginStatus(name) {
+      localStorage.setItem('loggedInUser', name);
+      loggedInUser = name;
+      updateLoginUI();
+    }
+
+    function logout() {
+      localStorage.removeItem('loggedInUser');
+      loggedInUser = null;
+      updateLoginUI();
+      alert('ログアウトしました');
+    }
+
+    function updateLoginUI() {
+      const postBtn = document.getElementById('postBtn');
+      const loginBtn = document.getElementById('loginBtn');
+      const loginStatus = document.getElementById('loginStatus');
+
+      if (loggedInUser) {
+        postBtn.disabled = false;
+        loginBtn.textContent = '🔐 ログアウト';
+        loginBtn.onclick = logout;
+        loginStatus.style.display = 'block';
+        loginStatus.textContent = `${loggedInUser} さんでログイン中`;
+      } else {
+        postBtn.disabled = true;
+        loginBtn.textContent = '🔐 ログイン';
+        loginBtn.onclick = showLoginForm;
+        loginStatus.style.display = 'none';
+        loginStatus.textContent = '';
+      }
+    }
+
+    function showLoginForm() {
+      document.getElementById('loginForm').style.display = 'block';
+    }
+
+    function hideLoginForm() {
+      document.getElementById('loginForm').style.display = 'none';
+    }
+
+    function login() {
+      const username = document.getElementById('username').value.trim();
+      if (!username) {
+        alert('ユーザー名を入力してください');
+        return;
+      }
+      saveLoginStatus(username);
+      hideLoginForm();
+      alert(`${username} さん、ログインしました。投稿ボタンが使えます。`);
+    }
+
+    function showMap() {
+      if (!map) {
+        map = L.map('map').setView([36.44, 139.00], 13);
+
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        const geojsonUrl = 'https://geoshape.ex.nii.ac.jp/city/geojson/20230101/10/10345A1991.geojson';
+
+        fetch(geojsonUrl)
+          .then(response => response.json())
+          .then(data => {
+            geojsonData = data;
+
+            geoJsonLayer = L.geoJSON(geojsonData, {
+              style: {
+                color: 'red',
+                weight: 2,
+                fillColor: '#f03',
+                fillOpacity: 0.2
+              }
+            }).addTo(map);
+
+            if (geoJsonLayer.getLayers().length > 0) {
+              map.fitBounds(geoJsonLayer.getBounds());
+            } else {
+              console.warn('GeoJSONレイヤーが空、または取得できません');
+            }
+
+            map.on('click', onMapClick);
+          })
+          .catch(err => {
+            console.error('GeoJSONの読み込みに失敗しました:', err);
+          });
+      } else {
+        map.invalidateSize();
+      }
+    }
+
+    function onMapClick(e) {
+      if (!isPostMode) {
+        alert('投稿モードを有効にしてから地図をクリックしてください。');
+        return;
+      }
+      if (!loggedInUser) {
+        alert('投稿にはログインが必要です。ログインしてください。');
+        return;
+      }
+
+      const latlng = e.latlng;
+      const point = turf.point([latlng.lng, latlng.lat]);
+
+      if (!geojsonData || !geojsonData.features || geojsonData.features.length === 0) {
+        alert('GeoJSONデータが正しく読み込めていません');
+        return;
+      }
+
+      const isInside = turf.booleanPointInPolygon(point, geojsonData.features[0]);
+
+      if (!isInside) {
+        alert('吉岡町の範囲外です。境界内をクリックしてください。');
+        return;
+      }
+
+      if (tempMarker) {
+        map.removeLayer(tempMarker);
+      }
+
+      tempMarker = L.marker(latlng).addTo(map)
+        .bindPopup('ここに投稿します')
+        .openPopup();
+
+      postLatLng = latlng;
+      postImageDataUrl = null;
+      document.getElementById('previewImage').style.display = 'none';
+      document.getElementById('postImage').value = '';
+      showPostForm();
+    }
+
+    function enablePostMode() {
+      if (!loggedInUser) {
+        alert('投稿にはログインが必要です。ログインしてください。');
+        return;
+      }
+      isPostMode = true;
+      alert('投稿モードを有効にしました。地図上をクリックして投稿場所を選んでください。');
+    }
+
+    function showPostForm() {
+      document.getElementById('postForm').style.display = 'block';
+      document.getElementById('postTitle').value = '';
+      document.getElementById('postComment').value = '';
+    }
+
+    function hidePostForm() {
+      document.getElementById('postForm').style.display = 'none';
+    }
+
+    document.getElementById('postImage').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) {
+        postImageDataUrl = null;
+        document.getElementById('previewImage').style.display = 'none';
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        postImageDataUrl = event.target.result;
+        const preview = document.getElementById('previewImage');
+        preview.src = postImageDataUrl;
+        preview.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    });
+
+    function submitPost() {
+      const title = document.getElementById('postTitle').value.trim();
+      const comment = document.getElementById('postComment').value.trim();
+
+      if (!title) {
+        alert('タイトルは必須です。');
+        return;
+      }
+
+      if (!postLatLng) {
+        alert('投稿場所が設定されていません。');
+        return;
+      }
+
+      let popupContent = `<b>${escapeHtml(title)}</b><br>${escapeHtml(comment)}`;
+      if (postImageDataUrl) {
+        popupContent += `<br><img src="${postImageDataUrl}" style="max-width:100%; max-height:200px; margin-top:5px; border-radius:4px;">`;
+      }
+      if (tempMarker) {
+        tempMarker.bindPopup(popupContent).openPopup();
+      }
+
+      hidePostForm();
+      isPostMode = false;
+      postLatLng = null;
+      postImageDataUrl = null;
+      alert('投稿が完了しました！');
+    }
+
+    function cancelPost() {
+      if (tempMarker) {
+        map.removeLayer(tempMarker);
+        tempMarker = null;
+      }
+      hidePostForm();
+      isPostMode = false;
+      postLatLng = null;
+      postImageDataUrl = null;
+    }
+
+    function escapeHtml(text) {
+      return text.replace(/[&<>"']/g, function(m) {
+        return ({
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#39;'
+        })[m];
+      });
+    }
+  </script>
+
+</body>
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyCTiKqnIOMyveGLedrWsABuZQBgcQk3hVM",
+    authDomain: "tiiki-memo.firebaseapp.com",
+    projectId: "tiiki-memo",
+    storageBucket: "tiiki-memo.firebasestorage.app",
+    messagingSenderId: "119948839279",
+    appId: "1:119948839279:web:e87447e9020b1bfae5c09a",
+    measurementId: "G-TNEKKJ20SV"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
+</html>
