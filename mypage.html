@@ -2,77 +2,69 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>マイページ - ちキメモ</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ちキメモ - プロフィール</title>
+
   <style>
     body {
-      font-family: Arial, sans-serif;
       margin: 0;
-      background-color: #f7f9fb;
-      padding: 2rem;
+      font-family: 'Helvetica Neue', sans-serif;
+      background: #f4f7fa;
     }
 
-    .profile-container {
-      max-width: 400px;
-      margin: 0 auto;
-      background: white;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    .container {
       padding: 2rem;
       text-align: center;
     }
 
-    .profile-container img {
-      width: 80px;
-      height: 80px;
+    .profile-pic {
+      width: 120px;
+      height: 120px;
       border-radius: 50%;
       object-fit: cover;
-      margin-bottom: 1rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
 
-    .display-name {
-      font-size: 1.2rem;
-      font-weight: bold;
-      margin-bottom: 0.5rem;
+    h2 {
+      margin-top: 1rem;
+      font-size: 1.4rem;
+      color: #333;
     }
 
     .uid {
       font-size: 0.9rem;
       color: #666;
-      word-break: break-all;
-      margin-bottom: 1.5rem;
+      margin-top: 0.4rem;
     }
 
-    .logout-btn {
+    button {
+      margin-top: 2rem;
+      padding: 0.7rem 1.4rem;
       background-color: #e53935;
       color: white;
       border: none;
-      padding: 0.7rem 1.2rem;
-      border-radius: 5px;
+      border-radius: 4px;
       font-size: 1rem;
       cursor: pointer;
     }
 
-    .logout-btn:hover {
+    button:hover {
       background-color: #c62828;
     }
   </style>
 </head>
 <body>
-  <div class="profile-container">
-    <img id="user-photo" src="https://via.placeholder.com/80" alt="プロフィール画像" />
-    <div class="display-name" id="user-name">読み込み中...</div>
-    <div class="uid" id="user-uid">ID: ----</div>
-    <button class="logout-btn" id="logout">ログアウト</button>
+  <div class="container">
+    <img id="user-photo" class="profile-pic" src="profile_icon.png" alt="プロフィール画像" />
+    <h2 id="user-name">ユーザー名</h2>
+    <p class="uid">ちキメモID: <span id="user-id">---</span></p>
+    <button id="logout-btn">ログアウト</button>
   </div>
 
+  <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-    import {
-      getAuth,
-      onAuthStateChanged,
-      signOut
-    } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCTiKqnIOMyveGLedrWsABuZQBgcQk3hVM",
@@ -87,23 +79,23 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
 
-    const userName = document.getElementById('user-name');
-    const userPhoto = document.getElementById('user-photo');
-    const userUid = document.getElementById('user-uid');
-    const logoutBtn = document.getElementById('logout');
+    const photo = document.getElementById('user-photo');
+    const name = document.getElementById('user-name');
+    const uid = document.getElementById('user-id');
+    const logoutBtn = document.getElementById('logout-btn');
 
-    onAuthStateChanged(auth, user => {
+    onAuthStateChanged(auth, (user) => {
       if (user) {
-        userName.textContent = user.displayName || "名前なし";
-        userPhoto.src = user.photoURL || "https://via.placeholder.com/80";
-        userUid.textContent = `ID: ${user.uid}`;
+        name.textContent = user.displayName || "名無し";
+        uid.textContent = user.uid;
+        photo.src = user.photoURL || "profile_icon.png";
       } else {
-        alert("ログインしていません。");
+        alert("ログインしていません。ログインページへ移動します。");
         window.location.href = "login.html";
       }
     });
 
-    logoutBtn.addEventListener('click', async () => {
+    logoutBtn.addEventListener("click", async () => {
       await signOut(auth);
       alert("ログアウトしました");
       window.location.href = "login.html";
