@@ -2,81 +2,77 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>ちキメモ - マイページ</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>マイページ - ちキメモ</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #f7f7f7;
       margin: 0;
+      background-color: #f7f9fb;
       padding: 2rem;
     }
-    h1 {
-      text-align: center;
-      color: #333;
-    }
-    .container {
-      max-width: 500px;
-      margin: 2rem auto;
+
+    .profile-container {
+      max-width: 400px;
+      margin: 0 auto;
       background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
       padding: 2rem;
-      border-radius: 8px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      text-align: center;
     }
-    button {
-      padding: 0.8rem 1.2rem;
-      font-size: 1rem;
-      margin-top: 1rem;
+
+    .profile-container img {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 1rem;
+    }
+
+    .display-name {
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+
+    .uid {
+      font-size: 0.9rem;
+      color: #666;
+      word-break: break-all;
+      margin-bottom: 1.5rem;
+    }
+
+    .logout-btn {
+      background-color: #e53935;
+      color: white;
       border: none;
-      border-radius: 4px;
+      padding: 0.7rem 1.2rem;
+      border-radius: 5px;
+      font-size: 1rem;
       cursor: pointer;
     }
-    .logout-btn {
-      background-color: #1976d2;
-      color: white;
-    }
+
     .logout-btn:hover {
-      background-color: #125ea7;
-    }
-    .delete-section {
-      margin-top: 2rem;
-      border-top: 1px solid #ccc;
-      padding-top: 1.5rem;
-    }
-    .delete-btn {
-      background-color: #d32f2f;
-      color: white;
-    }
-    .delete-btn:disabled {
-      background-color: #aaa;
-      cursor: not-allowed;
-    }
-    label {
-      font-size: 0.9rem;
-      display: block;
-      margin-top: 1rem;
+      background-color: #c62828;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>マイページ</h1>
-
-    <button class="logout-btn" id="logout-btn">ログアウト</button>
-
-    <div class="delete-section">
-      <h2>アカウント削除</h2>
-      <label>
-        <input type="checkbox" id="confirm-delete" />
-        データは完全に削除され元に戻すことはできないことを理解しました。
-      </label>
-      <button class="delete-btn" id="delete-btn" disabled>アカウントを削除する</button>
-    </div>
+  <div class="profile-container">
+    <img id="user-photo" src="https://via.placeholder.com/80" alt="プロフィール画像" />
+    <div class="display-name" id="user-name">読み込み中...</div>
+    <div class="uid" id="user-uid">ID: ----</div>
+    <button class="logout-btn" id="logout">ログアウト</button>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut, deleteUser } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+    import {
+      getAuth,
+      onAuthStateChanged,
+      signOut
+    } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCTiKqnIOMyveGLedrWsABuZQBgcQk3hVM",
@@ -91,51 +87,26 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
 
-    const logoutBtn = document.getElementById("logout-btn");
-    const deleteBtn = document.getElementById("delete-btn");
-    const confirmCheckbox = document.getElementById("confirm-delete");
+    const userName = document.getElementById('user-name');
+    const userPhoto = document.getElementById('user-photo');
+    const userUid = document.getElementById('user-uid');
+    const logoutBtn = document.getElementById('logout');
 
-    // 認証状態確認
-    onAuthStateChanged(auth, (user) => {
-      if (!user) {
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        userName.textContent = user.displayName || "名前なし";
+        userPhoto.src = user.photoURL || "https://via.placeholder.com/80";
+        userUid.textContent = `ID: ${user.uid}`;
+      } else {
         alert("ログインしていません。");
         window.location.href = "login.html";
       }
     });
 
-    // ログアウト処理
-    logoutBtn.addEventListener("click", async () => {
-      try {
-        await signOut(auth);
-        alert("ログアウトしました。");
-        window.location.href = "login.html";
-      } catch (error) {
-        alert("ログアウトに失敗しました: " + error.message);
-      }
-    });
-
-    // チェックボックスの状態で削除ボタン制御
-    confirmCheckbox.addEventListener("change", () => {
-      deleteBtn.disabled = !confirmCheckbox.checked;
-    });
-
-    // アカウント削除処理
-    deleteBtn.addEventListener("click", async () => {
-      const user = auth.currentUser;
-      if (!user) {
-        alert("ユーザー情報が取得できません。");
-        return;
-      }
-      const confirmed = confirm("本当にアカウントを削除してもよろしいですか？");
-      if (!confirmed) return;
-
-      try {
-        await deleteUser(user);
-        alert("アカウントを削除しました。");
-        window.location.href = "login.html";
-      } catch (error) {
-        alert("削除エラー: " + error.message + "\n再ログイン後にもう一度お試しください。");
-      }
+    logoutBtn.addEventListener('click', async () => {
+      await signOut(auth);
+      alert("ログアウトしました");
+      window.location.href = "login.html";
     });
   </script>
 </body>
