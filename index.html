@@ -4,7 +4,37 @@
   <meta charset="UTF-8" />
   <title>ちキメモ - 吉岡町の危険マップ</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- ✅ Firebaseのスクリプトをここに追加 -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-analytics.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
+    const firebaseConfig = {
+      apiKey: "AIzaSyCTiKqnIOMyveGLedrWsABuZQBgcQk3hVM",
+      authDomain: "tiiki-memo.firebaseapp.com",
+      projectId: "tiiki-memo",
+      storageBucket: "tiiki-memo.firebasestorage.app",
+      messagingSenderId: "119948839279",
+      appId: "1:119948839279:web:e87447e9020b1bfae5c09a",
+      measurementId: "G-TNEKKJ20SV"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+
+    const auth = getAuth(app);
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.href = "login.html";
+      } else {
+        console.log("ログイン中ユーザー:", user.email);
+      }
+    });
+  </script>
+</head>
+
+<body>
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
     body {
