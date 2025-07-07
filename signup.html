@@ -2,51 +2,170 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>reCAPTCHA v2 テスト</title>
+  <title>ちキメモ - サインアップ</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
+      background: #f4f7fa;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      margin: 0; padding: 0;
+      display: flex; justify-content: center; align-items: center;
+      height: 100vh;
     }
-    .error {
-      color: red;
-      margin-top: 5px;
+    .signup-container {
+      background: #fff;
+      padding: 2.5rem 3rem;
+      border-radius: 8px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      width: 320px;
+      text-align: center;
+    }
+    h1 {
+      margin-bottom: 1.8rem;
+      color: #333;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      text-align: left;
+    }
+    label {
+      margin-bottom: 0.3rem;
+      font-weight: 600;
+      color: #555;
+    }
+    input[type="email"],
+    input[type="password"] {
+      padding: 0.6rem 0.8rem;
+      margin-bottom: 0.4rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 1rem;
+      outline-color: #1976d2;
+      transition: border-color 0.3s ease;
+    }
+    .error-message {
+      color: #d32f2f;
+      font-size: 0.85rem;
+      margin-bottom: 0.8rem;
+      height: 1em;
+    }
+    button[type="submit"] {
+      background-color: #1976d2;
+      color: white;
+      border: none;
+      padding: 0.8rem;
+      font-size: 1.1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button[type="submit"]:hover {
+      background-color: #125ea7;
+    }
+    .signin-link {
+      margin-top: 1.2rem;
+      font-size: 0.9rem;
+      color: #555;
+      text-align: center;
+    }
+    .signin-link a {
+      color: #1976d2;
+      text-decoration: none;
+    }
+    .signin-link a:hover {
+      text-decoration: underline;
+    }
+    /* reCAPTCHA用エラー */
+    #recaptcha-error {
+      color: #d32f2f;
+      font-size: 0.85rem;
+      margin-bottom: 0.8rem;
       height: 1em;
     }
   </style>
+  <!-- reCAPTCHA v2 API -->
   <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 <body>
-  <h2>reCAPTCHA v2 チェックボックステスト</h2>
+  <div class="signup-container">
+    <h1>ちキメモ サインアップ</h1>
+    <form id="signup-form" novalidate>
+      <label for="email">メールアドレス</label>
+      <input type="email" id="email" name="email" required placeholder="example@mail.com" />
+      <div id="email-error" class="error-message"></div>
 
-  <form id="test-form">
-    <label for="email">メールアドレス:</label><br />
-    <input type="email" id="email" name="email" required /><br /><br />
+      <label for="password">パスワード</label>
+      <input type="password" id="password" name="password" required placeholder="********" />
+      <div id="password-error" class="error-message"></div>
 
-    <div class="g-recaptcha" data-sitekey="6Lf1UHsrAAAAAMr_V4R-qAy_AAFPMh71nEcKYdBi"></div>
-    <div id="recaptcha-error" class="error"></div>
+      <!-- reCAPTCHA チェックボックス -->
+      <div class="g-recaptcha" data-sitekey="6Lf1UHsrAAAAAMr_V4R-qAy_AAFPMh71nEcKYdBi"></div>
+      <div id="recaptcha-error"></div>
 
-    <br />
-    <button type="submit">送信</button>
-  </form>
+      <button type="submit">登録する</button>
+    </form>
 
-  <script>
-    const form = document.getElementById('test-form');
+    <p class="signin-link">
+      すでにアカウントをお持ちの方は
+      <a href="login.html">ログイン</a>
+    </p>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCTiKqnIOMyveGLedrWsABuZQBgcQk3hVM",
+      authDomain: "tiiki-memo.firebaseapp.com",
+      projectId: "tiiki-memo",
+      storageBucket: "tiiki-memo.appspot.com",
+      messagingSenderId: "119948839279",
+      appId: "1:119948839279:web:e87447e9020b1bfae5c09a",
+      measurementId: "G-TNEKKJ20SV"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    const form = document.getElementById('signup-form');
+    const emailError = document.getElementById('email-error');
+    const passwordError = document.getElementById('password-error');
     const recaptchaError = document.getElementById('recaptcha-error');
 
-    form.addEventListener('submit', function(event) {
-      event.preventDefault();
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      emailError.textContent = '';
+      passwordError.textContent = '';
       recaptchaError.textContent = '';
 
+      const email = form.email.value;
+      const password = form.password.value;
+
+      // reCAPTCHAチェック
       const recaptchaResponse = grecaptcha.getResponse();
       if (!recaptchaResponse) {
         recaptchaError.textContent = 'reCAPTCHAをチェックしてください。';
         return;
       }
 
-      alert('reCAPTCHAクリア！フォームを送信します（ここは連携後に置き換え）');
-      // ここにFirebase連携や送信処理を追加してください
+      try {
+        await createUserWithEmailAndPassword(auth, email, password);
+        alert('登録成功しました！ログインページへ移動します。');
+        window.location.href = 'login.html';
+      } catch (error) {
+        if (error.code === 'auth/weak-password') {
+          passwordError.textContent = 'パスワードが弱すぎます。6文字以上かつ数字を含めてください。';
+        } else if (error.code === 'auth/email-already-in-use') {
+          emailError.textContent = 'このメールアドレスはすでに使われています。';
+        } else if (error.code === 'auth/invalid-email') {
+          emailError.textContent = 'メールアドレスの形式が正しくありません。';
+        } else {
+          alert('エラー: ' + error.message);
+        }
+      }
     });
   </script>
 </body>
