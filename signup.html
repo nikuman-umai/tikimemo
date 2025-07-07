@@ -105,7 +105,18 @@
     .privacy-policy a:hover {
       text-decoration: underline;
     }
+
+    /* reCAPTCHA のエラーメッセージ用 */
+    #recaptcha-error {
+      color: #d32f2f;
+      font-size: 0.85rem;
+      margin-bottom: 0.8rem;
+      height: 1em;
+    }
   </style>
+
+  <!-- reCAPTCHA v2 API -->
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 <body>
   <div class="login-container">
@@ -123,6 +134,10 @@
       <label for="password-confirm">パスワード確認</label>
       <input type="password" id="password-confirm" name="password-confirm" required placeholder="********" />
       <div id="password-confirm-error" class="error-message"></div>
+
+      <!-- reCAPTCHA チェックボックス -->
+      <div class="g-recaptcha" data-sitekey="6Lc-TnsrAAAAAHs3gHp0_aXSQU_cFWGew--vzKYA"></div>
+      <div id="recaptcha-error"></div>
 
       <button type="submit">登録する</button>
     </form>
@@ -158,21 +173,31 @@
     const emailError = document.getElementById('email-error');
     const passwordError = document.getElementById('password-error');
     const passwordConfirmError = document.getElementById('password-confirm-error');
+    const recaptchaError = document.getElementById('recaptcha-error');
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      // 初期化
+      // エラーメッセージ初期化
       emailError.textContent = '';
       passwordError.textContent = '';
       passwordConfirmError.textContent = '';
+      recaptchaError.textContent = '';
 
       const email = form.email.value;
       const password = form.password.value;
       const passwordConfirm = form['password-confirm'].value;
 
+      // パスワード確認
       if (password !== passwordConfirm) {
         passwordConfirmError.textContent = 'パスワードが一致しません。';
+        return;
+      }
+
+      // reCAPTCHA チェック
+      const recaptchaResponse = grecaptcha.getResponse();
+      if (!recaptchaResponse) {
+        recaptchaError.textContent = 'reCAPTCHAをチェックしてください。';
         return;
       }
 
