@@ -2,179 +2,137 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>ちキメモ - ログイン</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    /* CSSはここにまとめて書きます */
     body {
-      background: #f4f7fa;
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-      margin: 0;
-      padding: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f4f7fa;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
     }
-
     .login-container {
-      background: white;
-      padding: 2.5rem 3rem;
+      background: #fff;
+      padding: 2rem;
       border-radius: 8px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
       width: 320px;
-      text-align: center;
     }
-
     h1 {
-      margin-bottom: 1.8rem;
-      color: #333;
+      text-align: center;
+      margin-bottom: 1.2rem;
     }
-
     form {
       display: flex;
       flex-direction: column;
-      text-align: left;
     }
-
     label {
-      margin-bottom: 0.3rem;
-      font-weight: 600;
-      color: #555;
+      margin-top: 0.5rem;
+      font-weight: bold;
     }
-
     input[type="email"],
     input[type="password"] {
-      padding: 0.6rem 0.8rem;
-      margin-bottom: 1.2rem;
+      padding: 0.6rem;
+      margin-top: 0.2rem;
       border: 1px solid #ccc;
       border-radius: 4px;
       font-size: 1rem;
-      outline-color: #1976d2;
-      transition: border-color 0.3s ease;
     }
-
-    input[type="email"]:focus,
-    input[type="password"]:focus {
-      border-color: #1976d2;
+    .error-message {
+      color: red;
+      font-size: 0.85rem;
+      height: 1.2em;
+      margin-top: 0.2rem;
     }
-
-    button[type="submit"] {
-      background-color: #1976d2;
+    button {
+      margin-top: 1rem;
+      padding: 0.8rem;
+      background: #1976d2;
       color: white;
       border: none;
-      padding: 0.8rem;
-      font-size: 1.1rem;
       border-radius: 4px;
       cursor: pointer;
-      transition: background-color 0.3s ease;
     }
-
-    button[type="submit"]:hover {
-      background-color: #125ea7;
+    button:hover {
+      background: #125ea7;
     }
-
-    .or-divider {
-      margin: 1.5rem 0;
-      font-weight: 600;
-      color: #666;
-      position: relative;
-      font-size: 0.9rem;
-    }
-
-    .or-divider::before,
-    .or-divider::after {
-      content: "";
-      position: absolute;
-      top: 50%;
-      width: 40%;
-      height: 1px;
-      background-color: #ccc;
-    }
-
-    .or-divider::before {
-      left: 0;
-    }
-
-    .or-divider::after {
-      right: 0;
-    }
-
-    .google-btn {
-      background-color: #de5246;
-      color: white;
-      border: none;
-      padding: 0.8rem;
-      font-size: 1.1rem;
-      border-radius: 4px;
-      cursor: pointer;
-      width: 100%;
-      transition: background-color 0.3s ease;
-    }
-
-    .google-btn:hover {
-      background-color: #b93a31;
-    }
-
     .signup-link {
-      margin-top: 1.2rem;
+      margin-top: 1rem;
+      text-align: center;
       font-size: 0.9rem;
-      color: #555;
     }
-
     .signup-link a {
       color: #1976d2;
       text-decoration: none;
-    }
-
-    .signup-link a:hover {
-      text-decoration: underline;
-    }
-
-    .privacy-policy {
-      margin-top: 1rem;
-      font-size: 0.8rem;
-      color: #999;
-    }
-
-    .privacy-policy a {
-      color: #999;
-      text-decoration: none;
-    }
-
-    .privacy-policy a:hover {
-      text-decoration: underline;
     }
   </style>
 </head>
 <body>
   <div class="login-container">
-    <h1>ちキメモ ログイン</h1>
-
+    <h1>ログイン</h1>
     <form id="login-form">
       <label for="email">メールアドレス</label>
-      <input type="email" id="email" name="email" required placeholder="example@mail.com" />
+      <input type="email" id="email" required />
+      <div id="email-error" class="error-message"></div>
 
       <label for="password">パスワード</label>
-      <input type="password" id="password" name="password" required placeholder="********" />
+      <input type="password" id="password" required />
+      <div id="password-error" class="error-message"></div>
 
       <button type="submit">ログイン</button>
     </form>
-
-    <div class="or-divider">または</div>
-
-    <button id="google-login" class="google-btn">Googleでログイン</button>
-
     <p class="signup-link">
-      アカウントをお持ちでない方は
-      <a href="signup.html">サインアップ</a>
-    </p>
-
-    <p class="privacy-policy">
-      <a href="privacy.html" target="_blank" rel="noopener noreferrer">プライバシーポリシー</a>
+      アカウントをお持ちでない方は <a href="signup.html">サインアップ</a>
     </p>
   </div>
 
-  <script src="login.js"></script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCTiKqnIOMyveGLedrWsABuZQBgcQk3hVM",
+      authDomain: "tiiki-memo.firebaseapp.com",
+      projectId: "tiiki-memo",
+      storageBucket: "tiiki-memo.appspot.com",
+      messagingSenderId: "119948839279",
+      appId: "1:119948839279:web:e87447e9020b1bfae5c09a",
+      measurementId: "G-TNEKKJ20SV"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    const form = document.getElementById('login-form');
+    const emailError = document.getElementById('email-error');
+    const passwordError = document.getElementById('password-error');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      emailError.textContent = '';
+      passwordError.textContent = '';
+
+      const email = form.email.value;
+      const password = form.password.value;
+
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        alert('ログイン成功！');
+        window.location.href = "mypage.html"; // ✅ 遷移先を好きに変えてOK
+      } catch (error) {
+        if (error.code === 'auth/wrong-password') {
+          passwordError.textContent = 'パスワードが違います。';
+        } else if (error.code === 'auth/user-not-found') {
+          emailError.textContent = 'ユーザーが見つかりません。';
+        } else if (error.code === 'auth/invalid-email') {
+          emailError.textContent = 'メールアドレスの形式が正しくありません。';
+        } else {
+          alert('ログインエラー: ' + error.message);
+        }
+      }
+    });
+  </script>
 </body>
 </html>
