@@ -5,8 +5,105 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>ちキメモ - サインアップ</title>
   <style>
-    /* 先ほどのlogin.cssと同じCSSをここにコピペするか、login.cssを読み込み */
-    /* 例は省略しますが、login.htmlと同じCSSを使うと良いです */
+    /* login.cssと同じスタイル */
+    body {
+      background: #f4f7fa;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .login-container {
+      background: white;
+      padding: 2.5rem 3rem;
+      border-radius: 8px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      width: 320px;
+      text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 1.8rem;
+      color: #333;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      text-align: left;
+    }
+
+    label {
+      margin-bottom: 0.3rem;
+      font-weight: 600;
+      color: #555;
+    }
+
+    input[type="email"],
+    input[type="password"] {
+      padding: 0.6rem 0.8rem;
+      margin-bottom: 1.2rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 1rem;
+      outline-color: #1976d2;
+      transition: border-color 0.3s ease;
+    }
+
+    input[type="email"]:focus,
+    input[type="password"]:focus {
+      border-color: #1976d2;
+    }
+
+    button[type="submit"] {
+      background-color: #1976d2;
+      color: white;
+      border: none;
+      padding: 0.8rem;
+      font-size: 1.1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button[type="submit"]:hover {
+      background-color: #125ea7;
+    }
+
+    .signup-link {
+      margin-top: 1.2rem;
+      font-size: 0.9rem;
+      color: #555;
+    }
+
+    .signup-link a {
+      color: #1976d2;
+      text-decoration: none;
+    }
+
+    .signup-link a:hover {
+      text-decoration: underline;
+    }
+
+    .privacy-policy {
+      margin-top: 1rem;
+      font-size: 0.8rem;
+      color: #999;
+      text-align: center;
+    }
+
+    .privacy-policy a {
+      color: #999;
+      text-decoration: none;
+    }
+
+    .privacy-policy a:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
@@ -36,6 +133,6 @@
     </p>
   </div>
 
-  <script src="signup.js"></script>
+  <script type="module" src="signup.js"></script>
 </body>
 </html>
