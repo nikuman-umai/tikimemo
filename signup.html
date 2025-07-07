@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>ちキメモ - サインアップ</title>
   <style>
-    /* login.cssと同じスタイル */
     body {
       background: #f4f7fa;
       font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -133,6 +132,51 @@
     </p>
   </div>
 
-  <script type="module" src="signup.js"></script>
+  <!-- Firebase SDKとサインアップ処理 -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, sendEmailVerification } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+
+    // あなたのFirebase設定に書き換えてください
+    const firebaseConfig = {
+      apiKey: "AIzaSyCTiKqnIOMyveGLedrWsABuZQBgcQk3hVM",
+      authDomain: "tiiki-memo.firebaseapp.com",
+      projectId: "tiiki-memo",
+      storageBucket: "tiiki-memo.appspot.com",
+      messagingSenderId: "119948839279",
+      appId: "1:119948839279:web:e87447e9020b1bfae5c09a",
+      measurementId: "G-TNEKKJ20SV"
+    };
+
+    // Firebase初期化
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    // サインアップフォーム送信処理
+    document.getElementById('signup-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = e.target.email.value;
+      const password = e.target.password.value;
+      const passwordConfirm = e.target['password-confirm'].value;
+
+      if (password !== passwordConfirm) {
+        alert('パスワードが一致しません。');
+        return;
+      }
+
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        // メール認証送信
+        await sendEmailVerification(user);
+
+        alert('登録成功！確認メールを送信しました。メールを確認してください。');
+        window.location.href = 'login.html';
+      } catch (error) {
+        alert('登録失敗: ' + error.message);
+      }
+    });
+  </script>
 </body>
 </html>
