@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ちキメモ - サインアップ</title>
+  <style>
+    /* 先ほどのlogin.cssと同じCSSをここにコピペするか、login.cssを読み込み */
+    /* 例は省略しますが、login.htmlと同じCSSを使うと良いです */
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <h1>ちキメモ サインアップ</h1>
+
+    <form id="signup-form">
+      <label for="email">メールアドレス</label>
+      <input type="email" id="email" name="email" required placeholder="example@mail.com" />
+
+      <label for="password">パスワード</label>
+      <input type="password" id="password" name="password" required placeholder="********" />
+
+      <label for="password-confirm">パスワード確認</label>
+      <input type="password" id="password-confirm" name="password-confirm" required placeholder="********" />
+
+      <button type="submit">登録する</button>
+    </form>
+
+    <p class="signup-link">
+      すでにアカウントをお持ちの方は
+      <a href="login.html">ログイン</a>
+    </p>
+
+    <p class="privacy-policy">
+      <a href="privacy.html" target="_blank" rel="noopener noreferrer">プライバシーポリシー</a>
+    </p>
+  </div>
+
+  <script src="signup.js"></script>
+</body>
+</html>
