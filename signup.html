@@ -45,7 +45,7 @@
     input[type="email"],
     input[type="password"] {
       padding: 0.6rem 0.8rem;
-      margin-bottom: 1.2rem;
+      margin-bottom: 0.4rem;
       border: 1px solid #ccc;
       border-radius: 4px;
       font-size: 1rem;
@@ -53,9 +53,11 @@
       transition: border-color 0.3s ease;
     }
 
-    input[type="email"]:focus,
-    input[type="password"]:focus {
-      border-color: #1976d2;
+    .error-message {
+      color: #d32f2f;
+      font-size: 0.85rem;
+      margin-bottom: 0.8rem;
+      height: 1em;
     }
 
     button[type="submit"] {
@@ -112,12 +114,15 @@
     <form id="signup-form">
       <label for="email">メールアドレス</label>
       <input type="email" id="email" name="email" required placeholder="example@mail.com" />
+      <div id="email-error" class="error-message"></div>
 
       <label for="password">パスワード</label>
       <input type="password" id="password" name="password" required placeholder="********" />
+      <div id="password-error" class="error-message"></div>
 
       <label for="password-confirm">パスワード確認</label>
       <input type="password" id="password-confirm" name="password-confirm" required placeholder="********" />
+      <div id="password-confirm-error" class="error-message"></div>
 
       <button type="submit">登録する</button>
     </form>
@@ -132,12 +137,10 @@
     </p>
   </div>
 
-  <!-- Firebase SDKとサインアップ処理 -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword, sendEmailVerification } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
-    // あなたのFirebase設定に書き換えてください
     const firebaseConfig = {
       apiKey: "AIzaSyCTiKqnIOMyveGLedrWsABuZQBgcQk3hVM",
       authDomain: "tiiki-memo.firebaseapp.com",
@@ -148,33 +151,48 @@
       measurementId: "G-TNEKKJ20SV"
     };
 
-    // Firebase初期化
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
 
-    // サインアップフォーム送信処理
-    document.getElementById('signup-form').addEventListener('submit', async (e) => {
+    const form = document.getElementById('signup-form');
+    const emailError = document.getElementById('email-error');
+    const passwordError = document.getElementById('password-error');
+    const passwordConfirmError = document.getElementById('password-confirm-error');
+
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const email = e.target.email.value;
-      const password = e.target.password.value;
-      const passwordConfirm = e.target['password-confirm'].value;
+
+      // 初期化
+      emailError.textContent = '';
+      passwordError.textContent = '';
+      passwordConfirmError.textContent = '';
+
+      const email = form.email.value;
+      const password = form.password.value;
+      const passwordConfirm = form['password-confirm'].value;
 
       if (password !== passwordConfirm) {
-        alert('パスワードが一致しません。');
+        passwordConfirmError.textContent = 'パスワードが一致しません。';
         return;
       }
 
       try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-
-        // メール認証送信
-        await sendEmailVerification(user);
-
+        await sendEmailVerification(userCredential.user);
         alert('登録成功！確認メールを送信しました。メールを確認してください。');
         window.location.href = 'login.html';
       } catch (error) {
-        alert('登録失敗: ' + error.message);
+        if (error.code === 'auth/weak-password') {
+          passwordError.textContent = 'パスワードが弱すぎます（6文字以上・数字を含む必要があります）。';
+        } else if (error.code === 'auth/email-already-in-use') {
+          emailError.textContent = 'このメールアドレスはすでに使われています。';
+        } else if (error.code === 'auth/invalid-email') {
+          emailError.textContent = 'メールアドレスの形式が正しくありません。';
+        } else if (error.code === 'auth/password-does-not-meet-requirements') {
+          passwordError.textContent = 'パスワードには数字を1文字以上含めてください。';
+        } else {
+          alert('エラー: ' + error.message);
+        }
       }
     });
   </script>
