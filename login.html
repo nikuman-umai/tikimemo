@@ -2,134 +2,38 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>ちキメモ ログイン・登録</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    body { font-family: sans-serif; max-width: 400px; margin: 40px auto; padding: 20px; }
-    input, button { width: 100%; padding: 10px; margin: 10px 0; font-size: 1em; }
-    button { cursor: pointer; }
-    #message { color: red; min-height: 1.2em; }
-    .toggle-link { cursor: pointer; color: blue; text-decoration: underline; }
-  </style>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <title>ちキメモ - ログイン</title>
+  <link rel="stylesheet" href="login.css" />
 </head>
 <body>
+  <div class="login-container">
+    <h1>ちキメモ ログイン</h1>
 
-  <h1 id="form-title">ちキメモ ログイン</h1>
+    <form id="login-form">
+      <label for="email">メールアドレス</label>
+      <input type="email" id="email" name="email" required placeholder="example@mail.com" />
 
-  <input type="email" id="email" placeholder="メールアドレス" autocomplete="username" />
-  <input type="password" id="password" placeholder="パスワード" autocomplete="current-password" />
+      <label for="password">パスワード</label>
+      <input type="password" id="password" name="password" required placeholder="********" />
 
-  <button id="submitBtn">ログイン</button>
-  <button id="googleLoginBtn">Googleでログイン</button>
+      <button type="submit">ログイン</button>
+    </form>
 
-  <p><span id="toggleText">アカウントをお持ちでないですか？</span> <span class="toggle-link" id="toggleLink">新規登録はこちら</span></p>
+    <div class="or-divider">または</div>
 
-  <div id="message"></div>
+    <button id="google-login" class="google-btn">Googleでログイン</button>
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyCTiKqnIOMyveGLedrWsABuZQBgcQk3hVM",
-      authDomain: "tiiki-memo.firebaseapp.com",
-      projectId: "tiiki-memo",
-      storageBucket: "tiiki-memo.firebasestorage.app",
-      messagingSenderId: "119948839279",
-      appId: "1:119948839279:web:00c0230267c3cc79e5c09a",
-      measurementId: "G-YZB83P0760"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
+    <p class="signup-link">
+      アカウントをお持ちでない方は
+      <a href="signup.html">サインアップ</a>
+    </p>
 
-    const emailInput = document.getElementById('email');
-    const passwordInput = document.getElementById('password');
-    const submitBtn = document.getElementById('submitBtn');
-    const googleLoginBtn = document.getElementById('googleLoginBtn');
-    const messageDiv = document.getElementById('message');
-    const formTitle = document.getElementById('form-title');
-    const toggleText = document.getElementById('toggleText');
-    const toggleLink = document.getElementById('toggleLink');
+    <p class="privacy-policy">
+      <a href="privacy.html" target="_blank" rel="noopener noreferrer">プライバシーポリシー</a>
+    </p>
+  </div>
 
-    let isLoginMode = true; // true=ログイン, false=サインアップ
-
-    function clearMessage() {
-      messageDiv.textContent = '';
-    }
-
-    function validateInput() {
-      if (!emailInput.value.trim() || !passwordInput.value) {
-        messageDiv.textContent = 'メールアドレスとパスワードを入力してください';
-        return false;
-      }
-      return true;
-    }
-
-    submitBtn.onclick = () => {
-      clearMessage();
-      if (!validateInput()) return;
-
-      const email = emailInput.value.trim();
-      const password = passwordInput.value;
-
-      if (isLoginMode) {
-        // ログイン処理
-        auth.signInWithEmailAndPassword(email, password)
-          .then(() => {
-            messageDiv.textContent = 'ログイン成功！ページを移動します...';
-            setTimeout(() => { window.location.href = "index.html"; }, 1000);
-          })
-          .catch(e => {
-            messageDiv.textContent = 'ログイン失敗: ' + e.message;
-          });
-      } else {
-        // サインアップ処理
-        auth.createUserWithEmailAndPassword(email, password)
-          .then(() => {
-            messageDiv.textContent = '登録成功！自動的にログインします...';
-            setTimeout(() => { window.location.href = "index.html"; }, 1000);
-          })
-          .catch(e => {
-            messageDiv.textContent = '登録失敗: ' + e.message;
-          });
-      }
-    };
-
-    googleLoginBtn.onclick = () => {
-      clearMessage();
-      const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithPopup(provider)
-        .then(() => {
-          messageDiv.textContent = 'Googleログイン成功！ページを移動します...';
-          setTimeout(() => { window.location.href = "index.html"; }, 1000);
-        })
-        .catch(e => {
-          messageDiv.textContent = 'Googleログイン失敗: ' + e.message;
-        });
-    };
-
-    toggleLink.onclick = () => {
-      isLoginMode = !isLoginMode;
-      clearMessage();
-      if (isLoginMode) {
-        formTitle.textContent = 'ちキメモ ログイン';
-        submitBtn.textContent = 'ログイン';
-        toggleText.textContent = 'アカウントをお持ちでないですか？';
-        toggleLink.textContent = '新規登録はこちら';
-      } else {
-        formTitle.textContent = 'ちキメモ 新規登録';
-        submitBtn.textContent = '登録する';
-        toggleText.textContent = 'すでにアカウントをお持ちですか？';
-        toggleLink.textContent = 'ログインはこちら';
-      }
-    };
-
-    // すでにログイン済みならメイン画面へ
-    auth.onAuthStateChanged(user => {
-      if (user) {
-        window.location.href = "index.html";
-      }
-    });
-  </script>
-
+  <script src="login.js"></script>
 </body>
 </html>
