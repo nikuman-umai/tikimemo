@@ -144,17 +144,15 @@
 <body>
   <div class="container">
     <h2>ちキメモ ログイン</h2>
-    <form id="login-form" novalidate>
+    <form id="login-form">
       <label for="email">メールアドレス</label>
-      <input type="email" id="email" required autocomplete="username" />
+      <input type="email" id="email" required />
 
       <label for="password">パスワード</label>
       <div class="password-container">
-        <input type="password" id="password" required autocomplete="current-password" />
+        <input type="password" id="password" required />
         <button type="button" onclick="togglePassword()">👁</button>
       </div>
-
-      <div id="recaptcha-container" style="margin-top: 15px;"></div>
 
       <p id="error-message"></p>
 
@@ -162,77 +160,72 @@
     </form>
   </div>
 
-  <button class="google-btn" onclick="loginWithGoogle()" aria-label="Googleでログイン">
-  　<img src="google_logo.png" alt="Googleロゴ" />
- 　 Googleでログイン
-</button>
+  <!-- Googleログインボタン -->
+  <button class="google-btn" id="google-login">
+    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Googleロゴ" />
+    Googleでログイン
+  </button>
 
   <button class="skip-btn" onclick="continueWithoutLogin()">ログインせずに続行</button>
 
-  <div class="link" style="max-width: 400px; width: 90%; margin: 0 auto;">
+  <div class="link">
     <p><a href="signup.html">新規登録はこちら</a></p>
   </div>
 
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-  <script>
+  <!-- Firebase SDK v9 modules -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-analytics.js";
+
     const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_PROJECT_ID.appspot.com",
-      messagingSenderId: "SENDER_ID",
-      appId: "APP_ID"
+      apiKey: "AIzaSyCTiKqnIOMyveGLedrWsABuZQBgcQk3hVM",
+      authDomain: "tiiki-memo.firebaseapp.com",
+      projectId: "tiiki-memo",
+      storageBucket: "tiiki-memo.appspot.com",
+      messagingSenderId: "119948839279",
+      appId: "1:119948839279:web:e87447e9020b1bfae5c09a",
+      measurementId: "G-TNEKKJ20SV"
     };
 
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const auth = getAuth(app);
 
-    window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
-      size: 'normal'
-    });
-  </script>
-
-  <script>
     const form = document.getElementById("login-form");
     const errorMsg = document.getElementById("error-message");
 
-    form.addEventListener("submit", (e) => {
+    form.addEventListener("submit", async (e) => {
       e.preventDefault();
-      errorMsg.textContent = "";
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value;
 
-      auth.signInWithEmailAndPassword(email, password)
-        .then(() => {
-          location.href = "index.html";
-        })
-        .catch((error) => {
-          errorMsg.textContent = "ログインに失敗しました: " + error.message;
-        });
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        window.location.href = "index.html";
+      } catch (error) {
+        errorMsg.textContent = "ログインに失敗しました: " + error.message;
+      }
     });
 
-    function togglePassword() {
+    document.getElementById("google-login").addEventListener("click", async () => {
+      const provider = new GoogleAuthProvider();
+      try {
+        await signInWithPopup(auth, provider);
+        window.location.href = "index.html";
+      } catch (error) {
+        errorMsg.textContent = "Googleログインに失敗しました: " + error.message;
+      }
+    });
+
+    window.togglePassword = function () {
       const pw = document.getElementById("password");
       pw.type = pw.type === "password" ? "text" : "password";
-    }
+    };
 
-    function continueWithoutLogin() {
-      location.href = "index.html";
-    }
-
-    function loginWithGoogle() {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithPopup(provider)
-        .then(() => {
-          location.href = "index.html";
-        })
-        .catch((error) => {
-          document.getElementById("error-message").textContent =
-            "Googleログインに失敗しました: " + error.message;
-        });
-    }
+    window.continueWithoutLogin = function () {
+      window.location.href = "index.html";
+    };
   </script>
 </body>
 </html>
