@@ -1,105 +1,88 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <style>
-  body {
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f2f2f2;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  margin: 0;
-  padding: 1rem;
-}
-
-form {
-  background-color: white;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  width: 100%;
-  max-width: 360px;
-  box-sizing: border-box;
-}
-
-label {
-  display: block;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-  margin-top: 1rem;
-}
-
-input[type="email"],
-input[type="password"] {
-  width: 100%;
-  padding: 0.6rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 1rem;
-  box-sizing: border-box;
-}
-
-button {
-  margin-top: 1.5rem;
-  width: 100%;
-  padding: 0.75rem;
-  background-color: #007bff;
-  border: none;
-  border-radius: 4px;
-  color: white;
-  font-weight: 700;
-  font-size: 1rem;
-  cursor: pointer;
-}
-
-button:hover {
-  background-color: #0056b3;
-}
-
-#error-message {
-  color: #d93025;
-  margin-top: 0.8rem;
-  font-weight: 600;
-}
-    </style>
-
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>ログイン</title>
   <style>
-    /* 簡単なスタイル例 */
+    /* ベーススタイル */
     body {
-      font-family: Arial, sans-serif;
-      padding: 1em;
-      max-width: 400px;
-      margin: auto;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f2f2f2;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 1rem;
     }
+
+    form {
+      background-color: white;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 360px;
+      box-sizing: border-box;
+    }
+
     label {
       display: block;
-      margin-top: 1em;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      margin-top: 1rem;
     }
+
     input[type="email"],
     input[type="password"] {
       width: 100%;
-      padding: 0.5em;
-      margin-top: 0.25em;
+      padding: 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 1rem;
       box-sizing: border-box;
     }
+
     button {
-      margin-top: 1em;
-      padding: 0.5em 1em;
-      font-size: 1em;
+      margin-top: 1.5rem;
+      width: 100%;
+      padding: 0.75rem;
+      background-color: #007bff;
+      border: none;
+      border-radius: 4px;
+      color: white;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
     }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
     #error-message {
-      color: red;
-      margin-top: 0.5em;
+      color: #d93025;
+      margin-top: 0.8rem;
+      font-weight: 600;
+    }
+
+    /* Googleログインボタン */
+    #google-login {
+      background-color: #db4437;
+      margin-top: 1rem;
+    }
+
+    #google-login:hover {
+      background-color: #a3332a;
     }
   </style>
 </head>
 <body>
-  <h1>ログイン</h1>
   <form id="login-form" autocomplete="on">
+    <h1>ログイン</h1>
+
     <label for="email">メールアドレス</label>
     <input type="email" id="email" name="email" autocomplete="email" required />
 
@@ -107,10 +90,11 @@ button:hover {
     <input type="password" id="password" name="password" autocomplete="current-password" required />
 
     <button type="submit">ログイン</button>
-  </form>
-  <div id="error-message"></div>
 
-  <button id="google-login">Googleでログイン</button>
+    <div id="error-message"></div>
+  </form>
+
+  <button id="google-login" type="button">Googleでログイン</button>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
@@ -139,6 +123,7 @@ button:hover {
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value;
       const errorMsg = document.getElementById("error-message");
+      errorMsg.textContent = "";
 
       try {
         await signInWithEmailAndPassword(auth, email, password);
@@ -151,6 +136,7 @@ button:hover {
     document.getElementById("google-login").addEventListener("click", async () => {
       const provider = new GoogleAuthProvider();
       const errorMsg = document.getElementById("error-message");
+      errorMsg.textContent = "";
 
       try {
         await signInWithPopup(auth, provider);
@@ -159,15 +145,6 @@ button:hover {
         errorMsg.textContent = "Googleログインに失敗しました: " + error.message;
       }
     });
-
-    window.togglePassword = function () {
-      const pw = document.getElementById("password");
-      pw.type = pw.type === "password" ? "text" : "password";
-    };
-
-    window.continueWithoutLogin = function () {
-      window.location.href = "index.html";
-    };
   </script>
 </body>
 </html>
