@@ -2,182 +2,150 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>ちキメモ - ログイン</title>
   <style>
     body {
+      background: #f4f7fa;
       font-family: sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #f0f8ff;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
+      margin: 0;
     }
 
-    .container {
-      background-color: #fff;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.2);
-      width: 90%;
-      max-width: 400px;
-    }
-
-    h2 {
+    .login-container {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      width: 320px;
       text-align: center;
-      margin-bottom: 20px;
     }
 
-    label {
-      display: block;
-      margin-top: 10px;
-      margin-bottom: 5px;
-    }
-
-    input[type="email"],
-    input[type="password"] {
+    input {
       width: 100%;
       padding: 10px;
+      margin-top: 10px;
+      margin-bottom: 10px;
       border: 1px solid #ccc;
-      border-radius: 6px;
+      border-radius: 4px;
+      font-size: 1rem;
     }
 
-    .password-container {
-      position: relative;
-    }
-
-    .password-container button {
-      position: absolute;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-size: 16px;
-    }
-
-    button[type="submit"] {
+    button {
       width: 100%;
-      padding: 12px;
-      margin-top: 20px;
-      background-color: #4CAF50;
+      padding: 10px;
+      background: #1976d2;
       color: white;
       border: none;
-      border-radius: 6px;
-      font-size: 16px;
+      border-radius: 4px;
+      font-size: 1rem;
       cursor: pointer;
     }
 
-    .skip-btn {
-      display: block;
-      margin: 20px auto 10px;
-      padding: 10px 20px;
-      background-color: #ddd;
-      border: none;
-      border-radius: 6px;
-      font-weight: bold;
-      cursor: pointer;
+    button:hover {
+      background: #125ea7;
     }
 
-    #error-message {
+    .google-button {
+      margin-top: 10px;
+      background-color: #db4437;
+    }
+
+    .guest-button {
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      background: #777;
+    }
+
+    .error {
       color: red;
-      margin-top: 10px;
-      text-align: center;
-    }
-
-    .link {
-      text-align: center;
-      margin-top: 10px;
-    }
-
-    .link a {
-      color: #007BFF;
-      text-decoration: none;
-    }
-
-    .link a:hover {
-      text-decoration: underline;
+      font-size: 0.9rem;
+      height: 1rem;
+      margin-bottom: 5px;
     }
   </style>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+    import {
+      getAuth,
+      signInWithEmailAndPassword,
+      GoogleAuthProvider,
+      signInWithPopup
+    } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCTiKqnIOMyveGLedrWsABuZQBgcQk3hVM",
+      authDomain: "tiiki-memo.firebaseapp.com",
+      projectId: "tiiki-memo",
+      storageBucket: "tiiki-memo.appspot.com",
+      messagingSenderId: "119948839279",
+      appId: "1:119948839279:web:e87447e9020b1bfae5c09a",
+      measurementId: "G-TNEKKJ20SV"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
+    window.addEventListener("DOMContentLoaded", () => {
+      const form = document.getElementById("login-form");
+      const emailInput = document.getElementById("email");
+      const passwordInput = document.getElementById("password");
+      const errorDiv = document.getElementById("error");
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        errorDiv.textContent = "";
+
+        try {
+          const userCredential = await signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
+          localStorage.setItem("loginStatus", "loggedin");
+          window.location.href = "index.html";
+        } catch (err) {
+          errorDiv.textContent = "ログインに失敗しました。メールアドレスとパスワードを確認してください。";
+        }
+      });
+
+      // Googleログインボタン
+      const googleBtn = document.getElementById("google-btn");
+      googleBtn.addEventListener("click", async () => {
+        try {
+          await signInWithPopup(auth, provider);
+          localStorage.setItem("loginStatus", "loggedin");
+          window.location.href = "index.html";
+        } catch (err) {
+          alert("Googleログインに失敗しました: " + err.message);
+        }
+      });
+
+      // ゲストボタン
+      const guestBtn = document.getElementById("guest-btn");
+      guestBtn.addEventListener("click", () => {
+        localStorage.setItem("loginStatus", "guest");
+        window.location.href = "index.html";
+      });
+    });
+  </script>
 </head>
 <body>
-  <div class="container">
+  <div class="login-container">
     <h2>ちキメモ ログイン</h2>
     <form id="login-form">
-      <label for="email">メールアドレス</label>
-      <input type="email" id="email" required />
-
-      <label for="password">パスワード</label>
-      <div class="password-container">
-        <input type="password" id="password" required />
-        <button type="button" onclick="togglePassword()">👁</button>
-      </div>
-
-      <div id="recaptcha-container" style="margin-top: 15px;"></div>
-
-      <p id="error-message"></p>
-
+      <input type="email" id="email" placeholder="メールアドレス" required />
+      <input type="password" id="password" placeholder="パスワード" required />
+      <div class="error" id="error"></div>
       <button type="submit">ログイン</button>
     </form>
 
-    <button class="skip-btn" onclick="continueWithoutLogin()">ログインせずに続行</button>
-
-    <div class="link">
-      <p><a href="signup.html">新規登録はこちら</a></p>
-    </div>
+    <button class="google-button" id="google-btn">Googleでログイン</button>
   </div>
 
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-  <script>
-    const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_PROJECT_ID.appspot.com",
-      messagingSenderId: "SENDER_ID",
-      appId: "APP_ID"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-
-    // reCAPTCHA
-    window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
-      size: 'normal'
-    });
-  </script>
-
-  <script>
-    const form = document.getElementById("login-form");
-    const errorMsg = document.getElementById("error-message");
-
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-
-      auth.signInWithEmailAndPassword(email, password)
-        .then(() => {
-          location.href = "index.html";
-        })
-        .catch((error) => {
-          errorMsg.textContent = "ログインに失敗しました: " + error.message;
-        });
-    });
-
-    function togglePassword() {
-      const pw = document.getElementById("password");
-      pw.type = pw.type === "password" ? "text" : "password";
-    }
-
-    function continueWithoutLogin() {
-      location.href = "index.html";
-    }
-  </script>
+  <button class="guest-button" id="guest-btn">ログインせずに続行</button>
 </body>
 </html>
