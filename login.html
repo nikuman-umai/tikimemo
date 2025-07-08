@@ -1,150 +1,131 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ログイン</title>
-  <style>
-    /* ベーススタイル */
-    body {
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f2f2f2;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      margin: 0;
-      padding: 1rem;
-    }
-
-    form {
-      background-color: white;
-      padding: 2rem;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      width: 100%;
-      max-width: 360px;
-      box-sizing: border-box;
-    }
-
-    label {
-      display: block;
-      font-weight: 600;
-      margin-bottom: 0.5rem;
-      margin-top: 1rem;
-    }
-
-    input[type="email"],
-    input[type="password"] {
-      width: 100%;
-      padding: 0.6rem;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      font-size: 1rem;
-      box-sizing: border-box;
-    }
-
-    button {
-      margin-top: 1.5rem;
-      width: 100%;
-      padding: 0.75rem;
-      background-color: #007bff;
-      border: none;
-      border-radius: 4px;
-      color: white;
-      font-weight: 700;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-
-    button:hover {
-      background-color: #0056b3;
-    }
-
-    #error-message {
-      color: #d93025;
-      margin-top: 0.8rem;
-      font-weight: 600;
-    }
-
-    /* Googleログインボタン */
-    #google-login {
-      background-color: #db4437;
-      margin-top: 1rem;
-    }
-
-    #google-login:hover {
-      background-color: #a3332a;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ログイン</title>
+<style>
+  body {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #fff;
+    padding: 1rem;
+    max-width: 480px;
+    margin: 2rem auto;
+    color: #333;
+  }
+  h1 {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  form {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 2rem;
+    background-color: #f9f9f9;
+  }
+  label {
+    display: block;
+    margin-bottom: 0.4rem;
+    font-weight: bold;
+  }
+  input[type="email"],
+  input[type="password"] {
+    width: 100%;
+    padding: 0.6rem;
+    margin-bottom: 1.2rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 1rem;
+  }
+  button {
+    width: 100%;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 0.75rem;
+    font-size: 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  button:hover {
+    background-color: #0056b3;
+  }
+  #error-message {
+    margin-top: 1rem;
+    color: #d93025;
+    font-weight: bold;
+  }
+  #google-login {
+    margin-top: 1rem;
+    background-color: #db4437;
+  }
+  #google-login:hover {
+    background-color: #a3332a;
+  }
+</style>
 </head>
 <body>
+  <h1>ログイン</h1>
   <form id="login-form" autocomplete="on">
-    <h1>ログイン</h1>
-
     <label for="email">メールアドレス</label>
     <input type="email" id="email" name="email" autocomplete="email" required />
-
     <label for="password">パスワード</label>
     <input type="password" id="password" name="password" autocomplete="current-password" required />
-
     <button type="submit">ログイン</button>
-
     <div id="error-message"></div>
   </form>
-
   <button id="google-login" type="button">Googleでログイン</button>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-    import {
-      getAuth,
-      signInWithEmailAndPassword,
-      signInWithPopup,
-      GoogleAuthProvider,
-    } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+  import {
+    getAuth,
+    signInWithEmailAndPassword,
+    signInWithPopup,
+    GoogleAuthProvider,
+  } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCTiKqnIOMyveGLedrWsABuZQBgcQk3hVM",
-      authDomain: "tiiki-memo.firebaseapp.com",
-      projectId: "tiiki-memo",
-      storageBucket: "tiiki-memo.appspot.com",
-      messagingSenderId: "119948839279",
-      appId: "1:119948839279:web:e87447e9020b1bfae5c09a",
-      measurementId: "G-TNEKKJ20SV",
-    };
+  const firebaseConfig = {
+    apiKey: "AIzaSyCTiKqnIOMyveGLedrWsABuZQBgcQk3hVM",
+    authDomain: "tiiki-memo.firebaseapp.com",
+    projectId: "tiiki-memo",
+    storageBucket: "tiiki-memo.appspot.com",
+    messagingSenderId: "119948839279",
+    appId: "1:119948839279:web:e87447e9020b1bfae5c09a",
+    measurementId: "G-TNEKKJ20SV",
+  };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
 
-    document.getElementById("login-form").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value;
-      const errorMsg = document.getElementById("error-message");
-      errorMsg.textContent = "";
+  document.getElementById("login-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+    const errorMsg = document.getElementById("error-message");
+    errorMsg.textContent = "";
 
-      try {
-        await signInWithEmailAndPassword(auth, email, password);
-        window.location.href = "index.html";
-      } catch (error) {
-        errorMsg.textContent = "ログインに失敗しました: " + error.message;
-      }
-    });
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      window.location.href = "index.html";
+    } catch (error) {
+      errorMsg.textContent = "ログインに失敗しました: " + error.message;
+    }
+  });
 
-    document.getElementById("google-login").addEventListener("click", async () => {
-      const provider = new GoogleAuthProvider();
-      const errorMsg = document.getElementById("error-message");
-      errorMsg.textContent = "";
+  document.getElementById("google-login").addEventListener("click", async () => {
+    const provider = new GoogleAuthProvider();
+    const errorMsg = document.getElementById("error-message");
+    errorMsg.textContent = "";
 
-      try {
-        await signInWithPopup(auth, provider);
-        window.location.href = "index.html";
-      } catch (error) {
-        errorMsg.textContent = "Googleログインに失敗しました: " + error.message;
-      }
-    });
-  </script>
+    try {
+      await signInWithPopup(auth, provider);
+      window.location.href = "index.html";
+    } catch (error) {
+      errorMsg.textContent = "Googleログインに失敗しました: " + error.message;
+    }
+  });
+</script>
 </body>
 </html>
