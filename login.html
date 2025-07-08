@@ -13,25 +13,21 @@
       margin: 2rem auto;
       color: #333;
     }
-
     h1 {
       text-align: center;
       margin-bottom: 2rem;
     }
-
     form {
       border: 1px solid #ccc;
       border-radius: 8px;
       padding: 2rem;
       background-color: #f9f9f9;
     }
-
     label {
       display: block;
       margin-bottom: 0.4rem;
       font-weight: bold;
     }
-
     input[type="email"],
     input[type="password"] {
       width: 100%;
@@ -42,7 +38,6 @@
       box-sizing: border-box;
       font-size: 1rem;
     }
-
     button {
       width: 100%;
       background-color: #007bff;
@@ -52,70 +47,35 @@
       font-size: 1rem;
       border-radius: 4px;
       cursor: pointer;
-      transition: background-color 0.3s ease;
     }
-
     button:hover {
       background-color: #0056b3;
     }
-
     #error-message {
       margin-top: 1rem;
       color: #d93025;
       font-weight: bold;
     }
-
     #google-login {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
+      margin-top: 1rem;
       background-color: #db4437;
-      color: white;
-      border: none;
-      padding: 0.6rem 1rem;
-      font-size: 1rem;
-      border-radius: 4px;
-      cursor: pointer;
-      margin-top: 1.5rem;
-      max-width: 100%;
-      width: 100%;
-      box-sizing: border-box;
     }
-
     #google-login:hover {
       background-color: #a3332a;
-    }
-
-    #google-login img {
-      width: 20px;
-      height: 20px;
-      vertical-align: middle;
-      margin-right: 8px;
     }
   </style>
 </head>
 <body>
   <h1>ログイン</h1>
-
   <form id="login-form" autocomplete="on">
     <label for="email">メールアドレス</label>
     <input type="email" id="email" name="email" autocomplete="email" required />
-
     <label for="password">パスワード</label>
     <input type="password" id="password" name="password" autocomplete="current-password" required />
-
     <button type="submit">ログイン</button>
-
     <div id="error-message"></div>
   </form>
-
-  <button id="google-login" type="button">
-    <img
-      src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
-      alt="Googleアイコン"
-    />
-    Googleでログイン
-  </button>
+  <button id="google-login" type="button">Googleでログイン</button>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
