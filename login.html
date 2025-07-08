@@ -6,7 +6,12 @@
   <title>ちキメモ ログイン</title>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+    import { 
+      getAuth, 
+      signInWithEmailAndPassword, 
+      signInWithPopup, 
+      GoogleAuthProvider 
+    } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
     // Firebase設定（あなたのものに差し替えてください）
     const firebaseConfig = {
@@ -21,10 +26,12 @@
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
 
     window.addEventListener("DOMContentLoaded", () => {
       const loginForm = document.getElementById("login-form");
       const errorMsg = document.getElementById("error-msg");
+      const googleLoginBtn = document.getElementById("google-login-btn");
 
       loginForm.addEventListener("submit", (e) => {
         e.preventDefault();
@@ -40,14 +47,25 @@
 
         signInWithEmailAndPassword(auth, email, password)
           .then((userCredential) => {
-            // ログイン成功
             console.log("ログイン成功:", userCredential.user);
-            // 例: プロフィールページに遷移
             window.location.href = "profile.html";
           })
           .catch((error) => {
             console.error("ログインエラー:", error);
             errorMsg.textContent = "ログインに失敗しました。メールアドレスまたはパスワードを確認してください。";
+          });
+      });
+
+      googleLoginBtn.addEventListener("click", () => {
+        errorMsg.textContent = "";
+        signInWithPopup(auth, provider)
+          .then((result) => {
+            console.log("Googleログイン成功:", result.user);
+            window.location.href = "profile.html";
+          })
+          .catch((error) => {
+            console.error("Googleログインエラー:", error);
+            errorMsg.textContent = "Googleログインに失敗しました。";
           });
       });
     });
@@ -75,6 +93,8 @@
     input[type="password"] {
       padding: 0.5rem;
       font-size: 1rem;
+      border-radius: 4px;
+      border: 1px solid #ccc;
     }
     button {
       padding: 0.75rem;
@@ -84,14 +104,23 @@
       border: none;
       border-radius: 4px;
       cursor: pointer;
+      transition: background-color 0.3s ease;
     }
     button:hover {
       background-color: #005a9e;
+    }
+    #google-login-btn {
+      background-color: #db4437;
+      margin-top: 1rem;
+    }
+    #google-login-btn:hover {
+      background-color: #a3332a;
     }
     #error-msg {
       color: red;
       min-height: 1.5em;
       text-align: center;
+      margin-top: 1rem;
     }
   </style>
 </head>
@@ -102,6 +131,7 @@
     <input type="password" id="password" name="password" placeholder="パスワード" autocomplete="current-password" required />
     <button type="submit">ログイン</button>
   </form>
+  <button id="google-login-btn" type="button">Googleでログイン</button>
   <p id="error-msg"></p>
 </body>
 </html>
