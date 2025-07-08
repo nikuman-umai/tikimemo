@@ -2,165 +2,182 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ちキメモ - ログイン</title>
   <style>
     body {
-      background: #f4f7fa;
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-family: sans-serif;
       margin: 0;
       padding: 0;
+      background-color: #f0f8ff;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
     }
 
-    .login-container {
-      background: white;
-      padding: 2.5rem 3rem;
-      border-radius: 8px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-      width: 320px;
+    .container {
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.2);
+      width: 90%;
+      max-width: 400px;
+    }
+
+    h2 {
       text-align: center;
-    }
-
-    h1 {
-      margin-bottom: 1.8rem;
-      color: #333;
-    }
-
-    form {
-      display: flex;
-      flex-direction: column;
-      text-align: left;
+      margin-bottom: 20px;
     }
 
     label {
-      margin-bottom: 0.3rem;
-      font-weight: 600;
-      color: #555;
+      display: block;
+      margin-top: 10px;
+      margin-bottom: 5px;
     }
 
     input[type="email"],
     input[type="password"] {
-      padding: 0.6rem 0.8rem;
-      margin-bottom: 0.4rem;
+      width: 100%;
+      padding: 10px;
       border: 1px solid #ccc;
-      border-radius: 4px;
-      font-size: 1rem;
-      outline-color: #1976d2;
-      transition: border-color 0.3s ease;
+      border-radius: 6px;
     }
 
-    .error-message {
-      color: #d32f2f;
-      font-size: 0.85rem;
-      margin-bottom: 0.8rem;
-      height: 1em;
+    .password-container {
+      position: relative;
+    }
+
+    .password-container button {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
     }
 
     button[type="submit"] {
-      background-color: #1976d2;
+      width: 100%;
+      padding: 12px;
+      margin-top: 20px;
+      background-color: #4CAF50;
       color: white;
       border: none;
-      padding: 0.8rem;
-      font-size: 1.1rem;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-
-    button[type="submit"]:hover {
-      background-color: #125ea7;
-    }
-
-    #guest-btn {
-      position: fixed;
-      bottom: 10px;
-      right: 10px;
-      background-color: transparent;
-      border: 2px solid #1976d2;
-      color: #1976d2;
-      padding: 0.6rem 1rem;
       border-radius: 6px;
-      font-size: 0.9rem;
+      font-size: 16px;
       cursor: pointer;
     }
 
-    #guest-btn:hover {
-      background-color: #1976d2;
-      color: white;
+    .skip-btn {
+      display: block;
+      margin: 20px auto 10px;
+      padding: 10px 20px;
+      background-color: #ddd;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    #error-message {
+      color: red;
+      margin-top: 10px;
+      text-align: center;
+    }
+
+    .link {
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .link a {
+      color: #007BFF;
+      text-decoration: none;
+    }
+
+    .link a:hover {
+      text-decoration: underline;
     }
   </style>
-
-  <!-- Firebase & reCAPTCHA -->
-  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js" type="module"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js" type="module"></script>
 </head>
 <body>
-  <div class="login-container">
-    <h1>ちキメモ ログイン</h1>
+  <div class="container">
+    <h2>ちキメモ ログイン</h2>
     <form id="login-form">
       <label for="email">メールアドレス</label>
       <input type="email" id="email" required />
 
       <label for="password">パスワード</label>
-      <input type="password" id="password" required />
+      <div class="password-container">
+        <input type="password" id="password" required />
+        <button type="button" onclick="togglePassword()">👁</button>
+      </div>
 
-      <div id="error-message" class="error-message"></div>
+      <div id="recaptcha-container" style="margin-top: 15px;"></div>
+
+      <p id="error-message"></p>
 
       <button type="submit">ログイン</button>
     </form>
-    <p style="margin-top: 1rem;">または <a href="signup.html">新規登録</a></p>
+
+    <button class="skip-btn" onclick="continueWithoutLogin()">ログインせずに続行</button>
+
+    <div class="link">
+      <p><a href="signup.html">新規登録はこちら</a></p>
+    </div>
   </div>
 
-  <button id="guest-btn">ログインせずに続行</button>
-
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script>
     const firebaseConfig = {
-      apiKey: "AIzaSyCTiKqnIOMyveGLedrWsABuZQBgcQk3hVM",
-      authDomain: "tiiki-memo.firebaseapp.com",
-      projectId: "tiiki-memo",
-      storageBucket: "tiiki-memo.appspot.com",
-      messagingSenderId: "119948839279",
-      appId: "1:119948839279:web:e87447e9020b1bfae5c09a"
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "SENDER_ID",
+      appId: "APP_ID"
     };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
 
-    const form = document.getElementById('login-form');
-    const errorMessage = document.getElementById('error-message');
+    // reCAPTCHA
+    window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+      size: 'normal'
+    });
+  </script>
 
-    form.addEventListener('submit', async (e) => {
+  <script>
+    const form = document.getElementById("login-form");
+    const errorMsg = document.getElementById("error-message");
+
+    form.addEventListener("submit", (e) => {
       e.preventDefault();
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
-      errorMessage.textContent = '';
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
 
-      try {
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        localStorage.setItem("loginStatus", "loggedin");
-        window.location.href = "index.html";
-      } catch (error) {
-        if (error.code === 'auth/user-not-found') {
-          errorMessage.textContent = 'ユーザーが見つかりません。';
-        } else if (error.code === 'auth/wrong-password') {
-          errorMessage.textContent = 'パスワードが間違っています。';
-        } else {
-          errorMessage.textContent = 'ログインに失敗しました。';
-        }
-      }
+      auth.signInWithEmailAndPassword(email, password)
+        .then(() => {
+          location.href = "index.html";
+        })
+        .catch((error) => {
+          errorMsg.textContent = "ログインに失敗しました: " + error.message;
+        });
     });
 
-    document.getElementById("guest-btn").addEventListener("click", () => {
-      localStorage.setItem("loginStatus", "guest");
-      window.location.href = "index.html";
-    });
+    function togglePassword() {
+      const pw = document.getElementById("password");
+      pw.type = pw.type === "password" ? "text" : "password";
+    }
+
+    function continueWithoutLogin() {
+      location.href = "index.html";
+    }
   </script>
 </body>
 </html>
