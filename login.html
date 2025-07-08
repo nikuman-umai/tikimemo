@@ -3,180 +3,60 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ちキメモ - ログイン</title>
+  <title>ログイン</title>
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
+    /* 簡単なスタイル例 */
     body {
-      font-family: sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #f0f8ff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-    }
-
-    .container {
-      background-color: #fff;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.2);
-      width: 90%;
+      font-family: Arial, sans-serif;
+      padding: 1em;
       max-width: 400px;
-      margin-top: 40px;
+      margin: auto;
     }
-
-    h2 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
     label {
       display: block;
-      margin-top: 10px;
-      margin-bottom: 5px;
+      margin-top: 1em;
     }
-
     input[type="email"],
     input[type="password"] {
       width: 100%;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
+      padding: 0.5em;
+      margin-top: 0.25em;
+      box-sizing: border-box;
     }
-
-    .password-container {
-      position: relative;
+    button {
+      margin-top: 1em;
+      padding: 0.5em 1em;
+      font-size: 1em;
     }
-
-    .password-container button {
-      position: absolute;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-size: 18px;
-      width: 30px;
-      height: 30px;
-      line-height: 1;
-      padding: 0;
-      overflow: hidden;
-    }
-
-    button[type="submit"] {
-      width: 100%;
-      padding: 12px;
-      margin-top: 20px;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
     #error-message {
       color: red;
-      margin-top: 10px;
-      text-align: center;
-    }
-
-    .skip-btn {
-      margin: 15px auto;
-      padding: 10px 20px;
-      background-color: #ddd;
-      border: none;
-      border-radius: 6px;
-      font-weight: bold;
-      cursor: pointer;
-      width: 90%;
-      max-width: 400px;
-    }
-
-    .link {
-      text-align: center;
-      margin-top: 10px;
-    }
-
-    .link a {
-      color: #007BFF;
-      text-decoration: none;
-    }
-
-    .link a:hover {
-      text-decoration: underline;
-    }
-
-    .google-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      width: 90%;
-      max-width: 400px;
-      margin: 15px auto 0;
-      padding: 12px;
-      background-color: white;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 600;
-      color: #555;
-      transition: background-color 0.2s ease;
-    }
-
-    .google-btn:hover {
-      background-color: #f5f5f5;
-    }
-
-    .google-btn img {
-      width: 20px;
-      height: 20px;
+      margin-top: 0.5em;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2>ちキメモ ログイン</h2>
-    <form id="login-form">
-      <label for="email">メールアドレス</label>
-      <input type="email" id="email" required />
+  <h1>ログイン</h1>
+  <form id="login-form" autocomplete="on">
+    <label for="email">メールアドレス</label>
+    <input type="email" id="email" name="email" autocomplete="email" required />
 
-      <label for="password">パスワード</label>
-      <div class="password-container">
-        <input type="password" id="password" required />
-        <button type="button" onclick="togglePassword()">👁</button>
-      </div>
+    <label for="password">パスワード</label>
+    <input type="password" id="password" name="password" autocomplete="current-password" required />
 
-      <p id="error-message"></p>
+    <button type="submit">ログイン</button>
+  </form>
+  <div id="error-message"></div>
 
-      <button type="submit">ログイン</button>
-    </form>
-  </div>
+  <button id="google-login">Googleでログイン</button>
 
-  <!-- Googleログインボタン -->
-  <button class="google-btn" id="google-login">
-    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Googleロゴ" />
-    Googleでログイン
-  </button>
-
-  <button class="skip-btn" onclick="continueWithoutLogin()">ログインせずに続行</button>
-
-  <div class="link">
-    <p><a href="signup.html">新規登録はこちら</a></p>
-  </div>
-
-  <!-- Firebase SDK v9 modules -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-analytics.js";
+    import {
+      getAuth,
+      signInWithEmailAndPassword,
+      signInWithPopup,
+      GoogleAuthProvider,
+    } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCTiKqnIOMyveGLedrWsABuZQBgcQk3hVM",
@@ -185,20 +65,17 @@
       storageBucket: "tiiki-memo.appspot.com",
       messagingSenderId: "119948839279",
       appId: "1:119948839279:web:e87447e9020b1bfae5c09a",
-      measurementId: "G-TNEKKJ20SV"
+      measurementId: "G-TNEKKJ20SV",
     };
 
     const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
     const auth = getAuth(app);
 
-    const form = document.getElementById("login-form");
-    const errorMsg = document.getElementById("error-message");
-
-    form.addEventListener("submit", async (e) => {
+    document.getElementById("login-form").addEventListener("submit", async (e) => {
       e.preventDefault();
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value;
+      const errorMsg = document.getElementById("error-message");
 
       try {
         await signInWithEmailAndPassword(auth, email, password);
@@ -210,6 +87,8 @@
 
     document.getElementById("google-login").addEventListener("click", async () => {
       const provider = new GoogleAuthProvider();
+      const errorMsg = document.getElementById("error-message");
+
       try {
         await signInWithPopup(auth, provider);
         window.location.href = "index.html";
