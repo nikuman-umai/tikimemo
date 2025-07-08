@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ちキメモ - ログイン</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f2f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .login-container {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.1);
+      width: 320px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 0.6rem;
+      margin-bottom: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      width: 100%;
+      padding: 0.7rem;
+      background-color: #1976d2;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #155a9c;
+    }
+
+    .error-message {
+      color: red;
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+    }
+
+    .link {
+      text-align: center;
+      margin-top: 1rem;
+      font-size: 0.9rem;
+    }
+
+    .link a {
+      color: #1976d2;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <h1>ログイン</h1>
+    <form id="login-form">
+      <input type="email" id="email" placeholder="メールアドレス" required />
+      <input type="password" id="password" placeholder="パスワード" required />
+      <div id="error-message" class="error-message"></div>
+      <button type="submit">ログイン</button>
+    </form>
+    <div class="link">
+      アカウントをお持ちでない方は <a href="signup.html">サインアップ</a>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCTiKqnIOMyveGLedrWsABuZQBgcQk3hVM",
+      authDomain: "tiiki-memo.firebaseapp.com",
+      projectId: "tiiki-memo",
+      storageBucket: "tiiki-memo.appspot.com",
+      messagingSenderId: "119948839279",
+      appId: "1:119948839279:web:e87447e9020b1bfae5c09a"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    const form = document.getElementById("login-form");
+    const errorMessage = document.getElementById("error-message");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      errorMessage.textContent = "";
+
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        window.location.href = "profile.html"; // ← ログイン成功後にページ遷移
+      } catch (error) {
+        if (error.code === "auth/wrong-password" || error.code === "auth/user-not-found") {
+          errorMessage.textContent = "メールアドレスまたはパスワードが違います。";
+        } else if (error.code === "auth/invalid-email") {
+          errorMessage.textContent = "メールアドレスの形式が正しくありません。";
+        } else {
+          errorMessage.textContent = "ログインに失敗しました: " + error.message;
+        }
+      }
+    });
+  </script>
+</body>
+</html>
