@@ -4,122 +4,51 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ちキメモ - サインアップ</title>
-
-  <!-- reCAPTCHA v2 -->
   <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-
   <style>
     body {
       background: #f4f7fa;
-      font-family: 'Helvetica Neue', sans-serif;
-      margin: 0;
-      padding: 0;
+      font-family: sans-serif;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
+      margin: 0;
     }
-
-    .signup-container {
-      background: white;
-      padding: 2rem 2.5rem;
+    .login-container {
+      background: #fff;
+      padding: 2rem;
       border-radius: 8px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
       width: 320px;
     }
-
-    h1 {
-      font-size: 1.5rem;
-      text-align: center;
-      margin-bottom: 1.5rem;
-      color: #333;
-    }
-
-    label {
-      display: block;
-      margin-top: 1rem;
-      margin-bottom: 0.3rem;
-      font-weight: bold;
-    }
-
-    input[type="email"],
-    input[type="password"] {
+    input, button {
       width: 100%;
+      margin-top: 0.5rem;
       padding: 0.6rem;
-      border: 1px solid #ccc;
-      border-radius: 4px;
       font-size: 1rem;
     }
-
     .error-message {
-      color: #d32f2f;
+      color: red;
       font-size: 0.85rem;
-      height: 1em;
-      margin-bottom: 0.5rem;
-    }
-
-    button {
-      margin-top: 1rem;
-      width: 100%;
-      padding: 0.8rem;
-      background-color: #1976d2;
-      color: white;
-      font-size: 1rem;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background-color: #125ea7;
-    }
-
-    .link {
-      margin-top: 1rem;
-      text-align: center;
-      font-size: 0.9rem;
-    }
-
-    .link a {
-      color: #1976d2;
-      text-decoration: none;
-    }
-
-    .link a:hover {
-      text-decoration: underline;
-    }
-
-    .privacy {
-      margin-top: 1rem;
-      text-align: center;
-      font-size: 0.75rem;
-      color: #777;
-    }
-
-    .privacy a {
-      color: #999;
-      text-decoration: none;
-    }
-
-    .privacy a:hover {
-      text-decoration: underline;
+      height: 1.2em;
     }
   </style>
 </head>
 <body>
-  <div class="signup-container">
-    <h1>ちキメモ 登録</h1>
+  <div class="login-container">
+    <h2>サインアップ</h2>
     <form id="signup-form">
-      <label for="email">メールアドレス</label>
-      <input type="email" id="email" name="email" required />
+      <label>メール</label>
+      <input type="email" id="email" required />
       <div id="email-error" class="error-message"></div>
 
-      <label for="password">パスワード</label>
-      <input type="password" id="password" name="password" required />
+      <label>パスワード</label>
+      <input type="password" id="password" required />
       <div id="password-error" class="error-message"></div>
 
-      <label for="confirm">パスワード確認</label>
-      <input type="password" id="confirm" name="confirm" required />
+      <label>パスワード確認</label>
+      <input type="password" id="password-confirm" required />
       <div id="confirm-error" class="error-message"></div>
 
       <div class="g-recaptcha" data-sitekey="6LeOVXsrAAAAAKldM--EJmATf0aNKnXA2LgcG0CV"></div>
@@ -127,17 +56,9 @@
 
       <button type="submit">登録する</button>
     </form>
-
-    <div class="link">
-      <p>すでにアカウントがありますか？<a href="login.html">ログイン</a></p>
-    </div>
-
-    <div class="privacy">
-      <a href="privacy.html" target="_blank">プライバシーポリシー</a>
-    </div>
+    <p><a href="login.html">ログインはこちら</a></p>
   </div>
 
-  <!-- Firebase + 認証処理 -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
     import { getAuth, createUserWithEmailAndPassword, sendEmailVerification } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
@@ -156,9 +77,6 @@
     const auth = getAuth(app);
 
     const form = document.getElementById('signup-form');
-    const emailEl = document.getElementById('email');
-    const passwordEl = document.getElementById('password');
-    const confirmEl = document.getElementById('confirm');
     const emailError = document.getElementById('email-error');
     const passwordError = document.getElementById('password-error');
     const confirmError = document.getElementById('confirm-error');
@@ -167,43 +85,38 @@
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      // エラー初期化
-      emailError.textContent = '';
-      passwordError.textContent = '';
-      confirmError.textContent = '';
-      recaptchaError.textContent = '';
+      emailError.textContent = "";
+      passwordError.textContent = "";
+      confirmError.textContent = "";
+      recaptchaError.textContent = "";
 
-      const email = emailEl.value;
-      const password = passwordEl.value;
-      const confirm = confirmEl.value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const confirm = document.getElementById('password-confirm').value;
+      const recaptcha = grecaptcha.getResponse();
 
-      // パスワード一致確認
-      if (password !== confirm) {
-        confirmError.textContent = 'パスワードが一致しません';
+      if (!recaptcha) {
+        recaptchaError.textContent = "reCAPTCHAをチェックしてください。";
         return;
       }
 
-      // reCAPTCHA チェック
-      const token = grecaptcha.getResponse();
-      if (!token) {
-        recaptchaError.textContent = 'reCAPTCHAを完了してください。';
+      if (password !== confirm) {
+        confirmError.textContent = "パスワードが一致しません。";
         return;
       }
 
       try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         await sendEmailVerification(userCredential.user);
-        alert('登録成功！確認メールを送信しました。メールをご確認ください。');
-        window.location.href = 'login.html';
+        alert("確認メールを送信しました。");
+        location.href = "login.html";
       } catch (error) {
         if (error.code === 'auth/weak-password') {
-          passwordError.textContent = 'パスワードが弱すぎます（6文字以上、数字を含めてください）';
+          passwordError.textContent = "パスワードが弱すぎます（数字を含めて6文字以上）。";
         } else if (error.code === 'auth/email-already-in-use') {
-          emailError.textContent = 'このメールアドレスはすでに使用されています';
-        } else if (error.code === 'auth/invalid-email') {
-          emailError.textContent = 'メールアドレスの形式が正しくありません';
+          emailError.textContent = "このメールアドレスは既に使用されています。";
         } else {
-          alert('エラー: ' + error.message);
+          alert("エラー: " + error.message);
         }
       }
     });
