@@ -7,76 +7,64 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #f4f7fa;
+      background: #f0f2f5;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
       margin: 0;
     }
+
     .login-container {
-      background: #fff;
+      background: white;
       padding: 2rem;
       border-radius: 8px;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+      box-shadow: 0 0 12px rgba(0,0,0,0.1);
       width: 320px;
     }
+
     h1 {
       text-align: center;
-      margin-bottom: 1.5rem;
+      color: #333;
     }
-    form {
-      display: flex;
-      flex-direction: column;
-    }
-    label {
-      margin: 0.5rem 0 0.2rem;
-      font-weight: bold;
-    }
+
     input[type="email"],
     input[type="password"] {
+      width: 100%;
       padding: 0.6rem;
+      margin-bottom: 1rem;
       border: 1px solid #ccc;
       border-radius: 4px;
-      margin-bottom: 0.5rem;
     }
+
+    button {
+      width: 100%;
+      padding: 0.7rem;
+      background-color: #1976d2;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #155a9c;
+    }
+
     .error-message {
       color: red;
       font-size: 0.85rem;
-      height: 1.2em;
+      margin-bottom: 1rem;
     }
-    button {
-      padding: 0.8rem;
-      border: none;
-      background: #1976d2;
-      color: white;
-      border-radius: 4px;
-      cursor: pointer;
-      margin-top: 1rem;
-    }
-    button:hover {
-      background: #125ea7;
-    }
-    .google-btn {
-      background: #fff;
-      color: #444;
-      border: 1px solid #ccc;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-top: 0.8rem;
-    }
-    .google-btn img {
-      width: 18px;
-      height: 18px;
-      margin-right: 0.5rem;
-    }
-    .signup-link {
+
+    .link {
       text-align: center;
       margin-top: 1rem;
       font-size: 0.9rem;
     }
-    .signup-link a {
+
+    .link a {
       color: #1976d2;
       text-decoration: none;
     }
@@ -86,35 +74,20 @@
   <div class="login-container">
     <h1>ログイン</h1>
     <form id="login-form">
-      <label for="email">メールアドレス</label>
-      <input type="email" id="email" required />
-      <div id="email-error" class="error-message"></div>
-
-      <label for="password">パスワード</label>
-      <input type="password" id="password" required />
-      <div id="password-error" class="error-message"></div>
-
+      <input type="email" id="email" placeholder="メールアドレス" required />
+      <input type="password" id="password" placeholder="パスワード" required />
+      <div id="error-message" class="error-message"></div>
       <button type="submit">ログイン</button>
     </form>
-
-    <button class="google-btn" id="google-login">
-      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" />
-      Googleでログイン
-    </button>
-
-    <p class="signup-link">
-      アカウントがない方は <a href="signup.html">サインアップ</a>
-    </p>
+    <div class="link">
+      アカウントをお持ちでない方は <a href="signup.html">サインアップ</a>
+    </div>
   </div>
 
+  <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-    import {
-      getAuth,
-      signInWithEmailAndPassword,
-      signInWithPopup,
-      GoogleAuthProvider
-    } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCTiKqnIOMyveGLedrWsABuZQBgcQk3hVM",
@@ -122,51 +95,33 @@
       projectId: "tiiki-memo",
       storageBucket: "tiiki-memo.appspot.com",
       messagingSenderId: "119948839279",
-      appId: "1:119948839279:web:e87447e9020b1bfae5c09a",
-      measurementId: "G-TNEKKJ20SV"
+      appId: "1:119948839279:web:e87447e9020b1bfae5c09a"
     };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
 
-    const form = document.getElementById('login-form');
-    const emailError = document.getElementById('email-error');
-    const passwordError = document.getElementById('password-error');
-    const googleLoginBtn = document.getElementById('google-login');
+    const form = document.getElementById("login-form");
+    const errorMessage = document.getElementById("error-message");
 
-    // メール＋パスワードログイン
-    form.addEventListener('submit', async (e) => {
+    form.addEventListener("submit", async (e) => {
       e.preventDefault();
-      emailError.textContent = '';
-      passwordError.textContent = '';
 
-      const email = form.email.value;
-      const password = form.password.value;
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      errorMessage.textContent = "";
 
       try {
         await signInWithEmailAndPassword(auth, email, password);
-        alert('ログイン成功！');
-        window.location.href = "mypage.html";
+        window.location.href = "profile.html"; // ← ログイン成功後にページ遷移
       } catch (error) {
-        if (error.code === 'auth/user-not-found') {
-          emailError.textContent = '登録されていないメールアドレスです。';
-        } else if (error.code === 'auth/wrong-password') {
-          passwordError.textContent = 'パスワードが間違っています。';
+        if (error.code === "auth/wrong-password" || error.code === "auth/user-not-found") {
+          errorMessage.textContent = "メールアドレスまたはパスワードが違います。";
+        } else if (error.code === "auth/invalid-email") {
+          errorMessage.textContent = "メールアドレスの形式が正しくありません。";
         } else {
-          alert('ログイン失敗: ' + error.message);
+          errorMessage.textContent = "ログインに失敗しました: " + error.message;
         }
-      }
-    });
-
-    // Googleログイン
-    googleLoginBtn.addEventListener('click', async () => {
-      try {
-        await signInWithPopup(auth, provider);
-        alert('Googleログイン成功！');
-        window.location.href = "mypage.html";
-      } catch (error) {
-        alert('Googleログイン失敗: ' + error.message);
       }
     });
   </script>
