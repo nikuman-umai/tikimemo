@@ -4,52 +4,37 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ちキメモ - プロフィール</title>
-
   <style>
     body {
       margin: 0;
-      font-family: 'Helvetica Neue', sans-serif;
+      font-family: sans-serif;
       background: #f4f7fa;
     }
-
     .container {
       padding: 2rem;
       text-align: center;
     }
-
     .profile-pic {
       width: 120px;
       height: 120px;
       border-radius: 50%;
       object-fit: cover;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
-
     h2 {
       margin-top: 1rem;
-      font-size: 1.4rem;
       color: #333;
     }
-
     .uid {
+      color: #777;
       font-size: 0.9rem;
-      color: #666;
-      margin-top: 0.4rem;
     }
-
     button {
       margin-top: 2rem;
-      padding: 0.7rem 1.4rem;
-      background-color: #e53935;
+      background: #e53935;
       color: white;
       border: none;
+      padding: 0.6rem 1.2rem;
       border-radius: 4px;
-      font-size: 1rem;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background-color: #c62828;
     }
   </style>
 </head>
@@ -61,7 +46,6 @@
     <button id="logout-btn">ログアウト</button>
   </div>
 
-  <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
@@ -82,7 +66,7 @@
     const photo = document.getElementById('user-photo');
     const name = document.getElementById('user-name');
     const uid = document.getElementById('user-id');
-    const logoutBtn = document.getElementById('logout-btn');
+    const logout = document.getElementById('logout-btn');
 
     onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -90,14 +74,13 @@
         uid.textContent = user.uid;
         photo.src = user.photoURL || "profile_icon.png";
       } else {
-        alert("ログインしていません。ログインページへ移動します。");
+        alert("ログインしていません。ログインページへ戻ります");
         window.location.href = "login.html";
       }
     });
 
-    logoutBtn.addEventListener("click", async () => {
+    logout.addEventListener("click", async () => {
       await signOut(auth);
-      alert("ログアウトしました");
       window.location.href = "login.html";
     });
   </script>
