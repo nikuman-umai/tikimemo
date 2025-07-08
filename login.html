@@ -7,64 +7,116 @@
   <style>
     body {
       background: #f4f7fa;
-      font-family: sans-serif;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 0;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
-      margin: 0;
     }
 
     .login-container {
       background: white;
-      padding: 2rem;
+      padding: 2.5rem 3rem;
       border-radius: 8px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.1);
       width: 320px;
       text-align: center;
     }
 
-    input {
-      width: 100%;
-      padding: 10px;
-      margin-top: 10px;
-      margin-bottom: 10px;
+    h1 {
+      margin-bottom: 1.8rem;
+      color: #333;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      text-align: left;
+    }
+
+    label {
+      margin-bottom: 0.3rem;
+      font-weight: 600;
+      color: #555;
+    }
+
+    input[type="email"],
+    input[type="password"] {
+      padding: 0.6rem 0.8rem;
+      margin-bottom: 0.4rem;
       border: 1px solid #ccc;
       border-radius: 4px;
       font-size: 1rem;
+      outline-color: #1976d2;
+      transition: border-color 0.3s ease;
     }
 
-    button {
-      width: 100%;
-      padding: 10px;
-      background: #1976d2;
+    .error-message {
+      color: #d32f2f;
+      font-size: 0.85rem;
+      margin-bottom: 0.8rem;
+      height: 1em;
+    }
+
+    button[type="submit"] {
+      background-color: #1976d2;
       color: white;
       border: none;
+      padding: 0.8rem;
+      font-size: 1.1rem;
       border-radius: 4px;
-      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button[type="submit"]:hover {
+      background-color: #125ea7;
+    }
+
+    #guest-btn {
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+      background-color: transparent;
+      border: 2px solid #1976d2;
+      color: #1976d2;
+      padding: 0.6rem 1rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
       cursor: pointer;
     }
 
-    button:hover {
-      background: #125ea7;
-    }
-
-    .guest-button {
-      position: fixed;
-      right: 16px;
-      bottom: 16px;
-      background: #777;
-    }
-
-    .error {
-      color: red;
-      font-size: 0.9rem;
-      height: 1rem;
-      margin-bottom: 5px;
+    #guest-btn:hover {
+      background-color: #1976d2;
+      color: white;
     }
   </style>
 
-  <!-- Firebase SDK -->
+  <!-- Firebase & reCAPTCHA -->
+  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js" type="module"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js" type="module"></script>
+</head>
+<body>
+  <div class="login-container">
+    <h1>ちキメモ ログイン</h1>
+    <form id="login-form">
+      <label for="email">メールアドレス</label>
+      <input type="email" id="email" required />
+
+      <label for="password">パスワード</label>
+      <input type="password" id="password" required />
+
+      <div id="error-message" class="error-message"></div>
+
+      <button type="submit">ログイン</button>
+    </form>
+    <p style="margin-top: 1rem;">または <a href="signup.html">新規登録</a></p>
+  </div>
+
+  <button id="guest-btn">ログインせずに続行</button>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
@@ -75,51 +127,40 @@
       projectId: "tiiki-memo",
       storageBucket: "tiiki-memo.appspot.com",
       messagingSenderId: "119948839279",
-      appId: "1:119948839279:web:e87447e9020b1bfae5c09a",
-      measurementId: "G-TNEKKJ20SV"
+      appId: "1:119948839279:web:e87447e9020b1bfae5c09a"
     };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
 
-    window.addEventListener("DOMContentLoaded", () => {
-      const form = document.getElementById("login-form");
-      const emailInput = document.getElementById("email");
-      const passwordInput = document.getElementById("password");
-      const errorDiv = document.getElementById("error");
+    const form = document.getElementById('login-form');
+    const errorMessage = document.getElementById('error-message');
 
-      form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        errorDiv.textContent = "";
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      errorMessage.textContent = '';
 
-        try {
-          const userCredential = await signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
-          localStorage.setItem("loginStatus", "loggedin");
-          window.location.href = "index.html";
-        } catch (err) {
-          errorDiv.textContent = "ログインに失敗しました。メールアドレスとパスワードを確認してください。";
-        }
-      });
-
-      const guestBtn = document.getElementById("guest-btn");
-      guestBtn.addEventListener("click", () => {
-        localStorage.setItem("loginStatus", "guest");
+      try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        localStorage.setItem("loginStatus", "loggedin");
         window.location.href = "index.html";
-      });
+      } catch (error) {
+        if (error.code === 'auth/user-not-found') {
+          errorMessage.textContent = 'ユーザーが見つかりません。';
+        } else if (error.code === 'auth/wrong-password') {
+          errorMessage.textContent = 'パスワードが間違っています。';
+        } else {
+          errorMessage.textContent = 'ログインに失敗しました。';
+        }
+      }
+    });
+
+    document.getElementById("guest-btn").addEventListener("click", () => {
+      localStorage.setItem("loginStatus", "guest");
+      window.location.href = "index.html";
     });
   </script>
-</head>
-<body>
-  <div class="login-container">
-    <h2>ちキメモ ログイン</h2>
-    <form id="login-form">
-      <input type="email" id="email" placeholder="メールアドレス" required />
-      <input type="password" id="password" placeholder="パスワード" required />
-      <div class="error" id="error"></div>
-      <button type="submit">ログイン</button>
-    </form>
-  </div>
-
-  <button class="guest-button" id="guest-btn">ログインせずに続行</button>
 </body>
 </html>
