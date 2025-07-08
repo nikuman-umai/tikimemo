@@ -5,13 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>ちキメモ - ログイン</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       font-family: sans-serif;
       margin: 0;
       padding: 0;
       background-color: #f0f8ff;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
       min-height: 100vh;
     }
@@ -23,7 +27,7 @@
       box-shadow: 0 0 20px rgba(0,0,0,0.2);
       width: 90%;
       max-width: 400px;
-      box-sizing: border-box;
+      margin-top: 40px;
     }
 
     h2 {
@@ -43,7 +47,6 @@
       padding: 10px;
       border: 1px solid #ccc;
       border-radius: 6px;
-      box-sizing: border-box;
     }
 
     .password-container {
@@ -58,8 +61,12 @@
       background: none;
       border: none;
       cursor: pointer;
-      font-size: 16px;
-      user-select: none;
+      font-size: 18px;
+      width: 30px;
+      height: 30px;
+      line-height: 1;
+      padding: 0;
+      overflow: hidden;
     }
 
     button[type="submit"] {
@@ -81,17 +88,15 @@
     }
 
     .skip-btn {
-      display: block;
-      margin: 20px auto 10px;
+      margin: 15px auto;
       padding: 10px 20px;
       background-color: #ddd;
       border: none;
       border-radius: 6px;
       font-weight: bold;
       cursor: pointer;
-      width: 100%;
+      width: 90%;
       max-width: 400px;
-      box-sizing: border-box;
     }
 
     .link {
@@ -108,13 +113,12 @@
       text-decoration: underline;
     }
 
-    /* Googleログインボタン */
     .google-btn {
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 10px;
-      width: 100%;
+      width: 90%;
       max-width: 400px;
       margin: 15px auto 0;
       padding: 12px;
@@ -122,11 +126,9 @@
       border: 1px solid #ccc;
       border-radius: 6px;
       cursor: pointer;
-      box-sizing: border-box;
       font-weight: 600;
       color: #555;
       transition: background-color 0.2s ease;
-      user-select: none;
     }
 
     .google-btn:hover {
@@ -149,7 +151,7 @@
       <label for="password">パスワード</label>
       <div class="password-container">
         <input type="password" id="password" required autocomplete="current-password" />
-        <button type="button" aria-label="パスワードの表示切替" onclick="togglePassword()">👁</button>
+        <button type="button" onclick="togglePassword()">👁</button>
       </div>
 
       <div id="recaptcha-container" style="margin-top: 15px;"></div>
@@ -167,7 +169,7 @@
 
   <button class="skip-btn" onclick="continueWithoutLogin()">ログインせずに続行</button>
 
-  <div class="link" style="max-width: 400px; margin: 0 auto;">
+  <div class="link" style="max-width: 400px; width: 90%; margin: 0 auto;">
     <p><a href="signup.html">新規登録はこちら</a></p>
   </div>
 
@@ -227,7 +229,8 @@
           location.href = "index.html";
         })
         .catch((error) => {
-          errorMsg.textContent = "Googleログインに失敗しました: " + error.message;
+          document.getElementById("error-message").textContent =
+            "Googleログインに失敗しました: " + error.message;
         });
     }
   </script>
